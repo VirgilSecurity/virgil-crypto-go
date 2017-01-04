@@ -264,14 +264,14 @@ func (c *NativeCrypto) DecryptThenVerify(data []byte, decryptionKey virgilcrypto
 }
 
 //ToSlice converts VirgilByteArray to a go slice
-func ToSlice(b VirgilByteArray) []byte{
+func ToSlice(b Std_vector_Sl_unsigned_SS_char_Sg_) []byte{
 	str := VirgilBase64Encode(b)
 	ret, _ := base64.StdEncoding.DecodeString(str)
 	return ret
 }
 
 //ToVirgilByteArray converts go slice to a VirgilByteArray
-func ToVirgilByteArray(data []byte) VirgilByteArray{
+func ToVirgilByteArray(data []byte) Std_vector_Sl_unsigned_SS_char_Sg_{
 	str := base64.StdEncoding.EncodeToString(data)
 	return VirgilBase64Decode(str)
 }
