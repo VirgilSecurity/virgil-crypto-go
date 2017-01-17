@@ -1,12 +1,12 @@
 package virgil_crypto_go
 
 import (
-	"gopkg.in/virgilsecurity/virgil-sdk-go.v4/virgilcrypto"
 	"io"
 	"crypto/sha256"
 	"encoding/base64"
 	"github.com/pkg/errors"
 	"fmt"
+	"gopkg.in/virgil.v4/virgilcrypto"
 )
 
 type NativeCrypto struct {
@@ -261,6 +261,25 @@ func (c *NativeCrypto) DecryptThenVerify(data []byte, decryptionKey virgilcrypto
 		return nil, err
 	}
 	return pt, nil
+}
+
+func (c *NativeCrypto) ExtractPublicKey(key virgilcrypto.PrivateKey) (pub virgilcrypto.PublicKey, err error){
+	defer func() {
+		if r := recover(); r != nil {
+			var ok bool
+			err, ok = r.(error)
+			if !ok {
+				err = fmt.Errorf("pkg: %v", r)
+			}
+		}
+	}()
+
+	k, ok := key.(nativePrivateKey)
+	if !ok{
+		return errors.New("the key is not native private key")
+	}
+	return k.ExtractPublicKey()
+
 }
 
 //ToSlice converts VirgilByteArray to a go slice
