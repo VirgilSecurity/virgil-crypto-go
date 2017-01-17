@@ -274,7 +274,7 @@ func (c *NativeCrypto) ExtractPublicKey(key virgilcrypto.PrivateKey) (pub virgil
 		}
 	}()
 
-	k, ok := key.(nativePrivateKey)
+	k, ok := key.(*nativePrivateKey)
 	if !ok{
 		return errors.New("the key is not native private key")
 	}
