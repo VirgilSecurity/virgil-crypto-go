@@ -1,6 +1,6 @@
 package virgil_crypto_go
 
-import "gopkg.in/virgilsecurity/virgil-sdk-go.v4/virgilcrypto"
+import "gopkg.in/virgil.v4/virgilcrypto"
 
 type nativePrivateKey struct {
 	receiverID []byte
