@@ -3,7 +3,6 @@ package virgil_crypto_go
 import (
 	"io"
 	"crypto/sha256"
-	"encoding/base64"
 	"github.com/pkg/errors"
 	"fmt"
 	"gopkg.in/virgil.v4/virgilcrypto"
@@ -455,13 +454,20 @@ func (c *NativeCrypto) ExtractPublicKey(key virgilcrypto.PrivateKey) (pub virgil
 
 //ToSlice converts VirgilByteArray to a go slice
 func ToSlice(b VirgilByteArray) []byte{
-	str := VirgilBase64Encode(b)
-	ret, _ := base64.StdEncoding.DecodeString(str)
-	return ret
+	l := int(b.Size())
+	res := make([]byte, l)
+	for i:= 0; i < l; i++{
+		res[i] = b.Get(i)
+	}
+	return res
 }
 
 //ToVirgilByteArray converts go slice to a VirgilByteArray
 func ToVirgilByteArray(data []byte) VirgilByteArray{
-	str := base64.StdEncoding.EncodeToString(data)
-	return VirgilBase64Decode(str)
+	l := len(data)
+	b := NewVirgilByteArray(int64(len(data)))
+	for i:= 0; i < l; i++{
+		b.Set(i, data[i])
+	}
+	return b
 }
