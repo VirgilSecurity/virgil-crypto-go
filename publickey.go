@@ -14,7 +14,11 @@ func (k *nativePublicKey) ReceiverID() []byte {
 }
 
 func (k *nativePublicKey) Encode() ([]byte, error) {
-	derPub := ToSlice(VirgilKeyPairPublicKeyToDER(ToVirgilByteArray(k.key)))
+	vkey := ToVirgilByteArray(k.key)
+	defer DeleteVirgilByteArray(vkey)
+	vder := VirgilKeyPairPublicKeyToDER(vkey)
+	defer DeleteVirgilByteArray(vder)
+	derPub := ToSlice(vder)
 	return derPub, nil
 }
 

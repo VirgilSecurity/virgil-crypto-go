@@ -18,9 +18,19 @@ func (k *nativePrivateKey) ReceiverID() []byte {
 
 func (k *nativePrivateKey) Encode(password []byte) (res []byte, err error) {
 	if(len(password) == 0){
-		return ToSlice(VirgilKeyPairPrivateKeyToDER(ToVirgilByteArray(k.key))), nil
+
+		vkey := ToVirgilByteArray(k.key)
+		defer DeleteVirgilByteArray(vkey)
+		venc := VirgilKeyPairPrivateKeyToDER(vkey)
+		defer DeleteVirgilByteArray(venc)
+
+		return ToSlice(venc), nil
 	} else {
-		return ToSlice(VirgilKeyPairEncryptPrivateKey(ToVirgilByteArray(k.key), ToVirgilByteArray([]byte(password)))), nil
+		vkey := ToVirgilByteArray(k.key)
+		defer DeleteVirgilByteArray(vkey)
+		vpass := ToVirgilByteArray([]byte(password))
+		defer DeleteVirgilByteArray(vpass)
+		return ToSlice(VirgilKeyPairEncryptPrivateKey(vkey, vpass)), nil
 	}
 }
 
@@ -29,8 +39,17 @@ func (k *nativePrivateKey) Empty() bool {
 }
 
 func (k *nativePrivateKey) ExtractPublicKey() (virgilcrypto.PublicKey, error) {
-	pub := VirgilKeyPairExtractPublicKey(ToVirgilByteArray(k.key), ToVirgilByteArray(make([]byte,0)))
-	derPub := ToSlice(VirgilKeyPairPublicKeyToDER(pub))
+	vkey := ToVirgilByteArray(k.key)
+	defer DeleteVirgilByteArray(vkey)
+	vempty := ToVirgilByteArray(make([]byte,0))
+	defer DeleteVirgilByteArray(vempty)
+	pub := VirgilKeyPairExtractPublicKey(vkey, vempty)
+	defer DeleteVirgilByteArray(pub)
+	vder := VirgilKeyPairPublicKeyToDER(pub)
+	defer DeleteVirgilByteArray(vder)
+
+
+	derPub := ToSlice(vder)
 	return &nativePublicKey{
 		key:derPub,
 		receiverID:k.receiverID,
