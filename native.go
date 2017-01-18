@@ -467,7 +467,7 @@ func ToSlice(b VirgilByteArray) []byte{
 //ToVirgilByteArray converts go slice to a VirgilByteArray
 func ToVirgilByteArray(data []byte) VirgilByteArray{
 	l := len(data)
-	b := NewVirgilByteArray(int64(len(data)))
+	b := NewVirgilByteArray(uint(len(data)))
 	for i:= 0; i < l; i++{
 		b.Set(i, data[i])
 	}
