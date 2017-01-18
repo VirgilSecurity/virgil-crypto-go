@@ -80,7 +80,9 @@ func (c *NativeCrypto) ImportPrivateKey(data []byte, password string) (_ virgilc
 		defer DeleteVirgilByteArray(vdata)
 		vpassword := ToVirgilByteArray([]byte(password))
 		defer DeleteVirgilByteArray(vpassword)
-		der := VirgilKeyPairPrivateKeyToDER( VirgilKeyPairDecryptPrivateKey(vdata, vpassword))
+		dec := VirgilKeyPairDecryptPrivateKey(vdata, vpassword)
+		defer DeleteVirgilByteArray(dec)
+		der := VirgilKeyPairPrivateKeyToDER(dec)
 		defer DeleteVirgilByteArray(der)
 
 		rawPriv = ToSlice(der)
