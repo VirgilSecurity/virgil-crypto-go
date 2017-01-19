@@ -279,7 +279,7 @@ func (c *NativeCrypto) DecryptStream(in io.Reader, out io.Writer, key virgilcryp
 
 	k, ok := key.(*nativePrivateKey)
 	if !ok{
-		return
+		return errors.New(" key is not native key")
 	}
 
 	vcontents := ToVirgilByteArray(k.Contents())
@@ -347,12 +347,61 @@ func (c *NativeCrypto) Verify(data []byte, signature []byte, key virgilcrypto.Pu
 	return valid, nil
 }
 
-func (c *NativeCrypto) SignStream(in io.Reader, signer virgilcrypto.PrivateKey) ([]byte, error) {
-	return nil, unsupportedError
+func (c *NativeCrypto) SignStream(in io.Reader, signerKey virgilcrypto.PrivateKey) (sign []byte, err error) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			var ok bool
+			err, ok = r.(error)
+			if !ok {
+				err = fmt.Errorf("pkg: %v", r)
+			}
+		}
+	}()
+
+	signer := NewVirgilStreamSigner()
+	defer DeleteVirgilStreamSigner(signer)
+
+	s := NewDirectorVirgilDataSource(NewDataSource(in))
+	defer DeleteDirectorVirgilDataSource(s)
+
+	vcontents := ToVirgilByteArray(signerKey.Contents())
+	defer DeleteVirgilByteArray(vcontents)
+
+	vsign := signer.Sign(s, vcontents)
+	defer DeleteVirgilByteArray(vsign)
+
+	return ToSlice(vsign), nil
 }
 
-func (c *NativeCrypto) VerifyStream(in io.Reader, signature []byte, key virgilcrypto.PublicKey) (bool, error) {
-	return false, unsupportedError
+func (c *NativeCrypto) VerifyStream(in io.Reader, signature []byte, key virgilcrypto.PublicKey) (res bool, err error) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			var ok bool
+			err, ok = r.(error)
+			if !ok {
+				err = fmt.Errorf("pkg: %v", r)
+			}
+		}
+	}()
+
+	signer := NewVirgilStreamSigner()
+	defer DeleteVirgilStreamSigner(signer)
+
+	s := NewDirectorVirgilDataSource(NewDataSource(in))
+	defer DeleteDirectorVirgilDataSource(s)
+
+	vsign := ToVirgilByteArray(signature)
+	defer DeleteVirgilByteArray(vsign)
+
+
+	vcontents := ToVirgilByteArray(key.Contents())
+	defer DeleteVirgilByteArray(vcontents)
+
+	res = signer.Verify(s, vsign, vcontents)
+
+	return res, nil
 }
 func (c *NativeCrypto) CalculateFingerprint(data []byte) []byte {
 	hash := sha256.Sum256(data)
