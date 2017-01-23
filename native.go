@@ -12,8 +12,6 @@ type NativeCrypto struct {
 
 }
 
-var unsupportedError = errors.New("unsupported")
-
 const signatureKey = "VIRGIL-DATA-SIGNATURE"
 
 func (c *NativeCrypto) GenerateKeypair() (_ virgilcrypto.Keypair, err error) {
@@ -72,11 +70,12 @@ func (c *NativeCrypto) ImportPrivateKey(data []byte, password string) (_ virgilc
 	}()
 	var rawPriv []byte
 
+	unwrappedKey := unwrapKey(data)
 	if(password == ""){
-		rawPriv = data
+		rawPriv = unwrappedKey
 	} else {
 
-		vdata := ToVirgilByteArray(data)
+		vdata := ToVirgilByteArray(unwrappedKey)
 		defer DeleteVirgilByteArray(vdata)
 		vpassword := ToVirgilByteArray([]byte(password))
 		defer DeleteVirgilByteArray(vpassword)
@@ -116,7 +115,7 @@ func (c *NativeCrypto) ImportPublicKey(data []byte) (_ virgilcrypto.PublicKey, e
 		}
 	}()
 
-	vdata := ToVirgilByteArray(data)
+	vdata := ToVirgilByteArray(unwrapKey(data))
 	defer DeleteVirgilByteArray(vdata)
 	vder := VirgilKeyPairPublicKeyToDER(vdata)
 	defer DeleteVirgilByteArray(vder)
@@ -347,7 +346,7 @@ func (c *NativeCrypto) Verify(data []byte, signature []byte, key virgilcrypto.Pu
 	return valid, nil
 }
 
-func (c *NativeCrypto) SignStream(in io.Reader, signerKey virgilcrypto.PrivateKey) (sign []byte, err error) {
+func (c *NativeCrypto) SignStream(in io.Reader, signerKey virgilcrypto.PrivateKey) (_ []byte, err error) {
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -484,7 +483,7 @@ func (c *NativeCrypto) DecryptThenVerify(data []byte, decryptionKey virgilcrypto
 	return pt, nil
 }
 
-func (c *NativeCrypto) ExtractPublicKey(key virgilcrypto.PrivateKey) (pub virgilcrypto.PublicKey, err error){
+func (c *NativeCrypto) ExtractPublicKey(key virgilcrypto.PrivateKey) (_ virgilcrypto.PublicKey, err error){
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
