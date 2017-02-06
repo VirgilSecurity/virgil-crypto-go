@@ -247,7 +247,7 @@ func (c *NativeCrypto) Decrypt(data []byte, key virgilcrypto.PrivateKey) (_ []by
 	defer DeleteVirgilByteArray(vdata)
 	vrec := ToVirgilByteArray(key.ReceiverID())
 	defer DeleteVirgilByteArray(vrec)
-	vcontents := ToVirgilByteArray(k.Contents())
+	vcontents := ToVirgilByteArray(k.contents())
 	defer DeleteVirgilByteArray(vcontents)
 
 	vplain := ci.DecryptWithKey(vdata, vrec, vcontents)
@@ -281,7 +281,7 @@ func (c *NativeCrypto) DecryptStream(in io.Reader, out io.Writer, key virgilcryp
 		return errors.New(" key is not native key")
 	}
 
-	vcontents := ToVirgilByteArray(k.Contents())
+	vcontents := ToVirgilByteArray(k.contents())
 	defer DeleteVirgilByteArray(vcontents)
 
 	vrec := ToVirgilByteArray(k.receiverID)

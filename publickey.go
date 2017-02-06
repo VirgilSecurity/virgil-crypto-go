@@ -5,7 +5,7 @@ type nativePublicKey struct {
 	key        []byte
 }
 
-func (k *nativePublicKey) Contents() []byte {
+func (k *nativePublicKey) contents() []byte {
 	return k.key
 }
 

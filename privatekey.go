@@ -8,7 +8,7 @@ type nativePrivateKey struct {
 }
 
 
-func (k *nativePrivateKey) Contents() []byte {
+func (k *nativePrivateKey) contents() []byte {
 	return k.key
 }
 
@@ -16,7 +16,7 @@ func (k *nativePrivateKey) ReceiverID() []byte {
 	return k.receiverID
 }
 
-func (k *nativePrivateKey) Encode(password []byte) (res []byte, err error) {
+func (k *nativePrivateKey) Encode(password []byte) ([]byte, error) {
 	if(len(password) == 0){
 
 		vkey := ToVirgilByteArray(k.key)
