@@ -170,9 +170,11 @@ func (c *NativeCrypto) Encrypt(data []byte, recipients ...virgilcrypto.PublicKey
 	defer DeleteVirgilCipher(ci)
 
 	for _,r := range recipients{
-		vrec :=ToVirgilByteArray(r.ReceiverID())
+		rec := r.(*nativePublicKey)
+
+		vrec :=ToVirgilByteArray(rec.ReceiverID())
 		defer DeleteVirgilByteArray(vrec)
-		vcon := ToVirgilByteArray(r.Contents())
+		vcon := ToVirgilByteArray(rec.contents())
 		defer DeleteVirgilByteArray(vcon)
 		ci.AddKeyRecipient(vrec, vcon)
 	}
@@ -208,10 +210,11 @@ func (c *NativeCrypto) EncryptStream(in io.Reader, out io.Writer, recipients ...
 	defer DeleteVirgilStreamCipher(ci)
 
 	for _,r := range recipients{
-		vrec := ToVirgilByteArray(r.ReceiverID())
+		rec := r.(*nativePublicKey)
+		vrec := ToVirgilByteArray(rec.ReceiverID())
 		defer DeleteVirgilByteArray(vrec)
 
-		vcon := ToVirgilByteArray(r.Contents())
+		vcon := ToVirgilByteArray(rec.contents())
 		defer DeleteVirgilByteArray(vcon)
 		ci.AddKeyRecipient(vrec, vcon)
 
@@ -339,7 +342,7 @@ func (c *NativeCrypto) Verify(data []byte, signature []byte, key virgilcrypto.Pu
 	defer DeleteVirgilByteArray(vdata)
 	vsignature := ToVirgilByteArray(signature)
 	defer DeleteVirgilByteArray(vsignature)
-	vcontents := ToVirgilByteArray(key.Contents())
+	vcontents := ToVirgilByteArray(key.(*nativePublicKey).contents())
 	defer DeleteVirgilByteArray(vcontents)
 
 	valid := s.Verify(vdata, vsignature, vcontents)
@@ -364,7 +367,7 @@ func (c *NativeCrypto) SignStream(in io.Reader, signerKey virgilcrypto.PrivateKe
 	s := NewDirectorVirgilDataSource(NewDataSource(in))
 	defer DeleteDirectorVirgilDataSource(s)
 
-	vcontents := ToVirgilByteArray(signerKey.Contents())
+	vcontents := ToVirgilByteArray(signerKey.(*nativePrivateKey).contents())
 	defer DeleteVirgilByteArray(vcontents)
 
 	vsign := signer.Sign(s, vcontents)
@@ -395,7 +398,7 @@ func (c *NativeCrypto) VerifyStream(in io.Reader, signature []byte, key virgilcr
 	defer DeleteVirgilByteArray(vsign)
 
 
-	vcontents := ToVirgilByteArray(key.Contents())
+	vcontents := ToVirgilByteArray(key.(*nativePublicKey).contents())
 	defer DeleteVirgilByteArray(vcontents)
 
 	res = signer.Verify(s, vsign, vcontents)
@@ -435,7 +438,7 @@ func (c *NativeCrypto) SignThenEncrypt(data []byte, signerKey virgilcrypto.Priva
 	for _,r := range recipients{
 		vrec := ToVirgilByteArray(r.ReceiverID())
 		defer DeleteVirgilByteArray(vrec)
-		vconts := ToVirgilByteArray(r.Contents())
+		vconts := ToVirgilByteArray(r.(*nativePublicKey).contents())
 		defer DeleteVirgilByteArray(vconts)
 		ci.AddKeyRecipient(vrec, vconts)
 	}
