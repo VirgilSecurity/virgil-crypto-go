@@ -1,5 +1,5 @@
 # virgil-crypto-go
-Crypto implementation which uses wrapper for c++ crypto library
+Crypto implementation which uses wrapper for [c++ crypto library](https://github.com/VirgilSecurity/virgil-crypto)
 
 ##Usage
 
