@@ -4,7 +4,7 @@ Crypto implementation which uses wrapper for c++ crypto library
 ##Usage
 
 * Place generated virgil_crypto_go.go and all dependencies in this folder
-* In your code import github.com/virgilsecurity/virgil-crypto-go
+* In your code import gopkg.in/virgilsecurity/virgil-crypto-go.v4
 ```go
 import (
 	"gopkg.in/virgil.v4"
