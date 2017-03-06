@@ -9,10 +9,19 @@ import (
 )
 
 type NativeCrypto struct {
-
+	keyType virgilcrypto.KeyType
 }
 
 const signatureKey = "VIRGIL-DATA-SIGNATURE"
+
+func (c *NativeCrypto) SetKeyType(keyType virgilcrypto.KeyType) error {
+	if _, ok := KeyTypeMap[keyType]; !ok{
+		return errors.New("key type not supported")
+	} else {
+		c.keyType = keyType
+		return nil
+	}
+}
 
 func (c *NativeCrypto) GenerateKeypair() (_ virgilcrypto.Keypair, err error) {
 
@@ -26,7 +35,12 @@ func (c *NativeCrypto) GenerateKeypair() (_ virgilcrypto.Keypair, err error) {
 		}
 	}()
 
-	kp := VirgilKeyPairGenerate(VirgilKeyPairType_FAST_EC_ED25519)
+	keyType, ok := KeyTypeMap[c.keyType]
+	if !ok{
+		return nil, errors.New("This key type is not supported")
+	}
+
+	kp := VirgilKeyPairGenerate(keyType)
 	defer  DeleteVirgilKeyPair(kp)
 
 	der := VirgilKeyPairPublicKeyToDER(kp.PublicKey())
