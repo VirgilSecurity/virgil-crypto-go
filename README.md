@@ -2,7 +2,7 @@
 Crypto implementation which uses wrapper for [c++ crypto library](https://github.com/VirgilSecurity/virgil-crypto)
 
 ##Usage
-
+* Build C++ library for Go
 * Place generated virgil_crypto_go.go and all dependencies in this folder
 * In your code import gopkg.in/virgilsecurity/virgil-crypto-go.v4
 ```go
@@ -18,3 +18,4 @@ import (
 ```go
   virgilcrypto.DefaultCrypto = &crypto.NativeCrypto{}
 ```
+
