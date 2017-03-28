@@ -28,7 +28,7 @@ func TestSignEncrypt(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if plaintext, err := crypto.DecryptThenVerify(cipherText, keypair.PrivateKey(), signerKeypair.PublicKey()); err != nil || !bytes.Equal(plaintext, data) {
+	if plaintext, err := crypto.DecryptThenVerify(cipherText, keypair.PrivateKey(), keypair.PublicKey(), signerKeypair.PublicKey()); err != nil || !bytes.Equal(plaintext, data) {
 		t.Fatal(err)
 	}
 
@@ -62,8 +62,6 @@ func BenchmarkSignThenEncrypt(b *testing.B){
 			b.Fatal(err)
 		}
 	}
-
-
 
 }
 
