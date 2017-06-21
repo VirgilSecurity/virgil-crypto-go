@@ -123,21 +123,7 @@ func (c *NativeCrypto) ImportPrivateKey(data []byte, password string) (_ virgilc
 }
 
 func (c *NativeCrypto) ImportPublicKey(data []byte) (_ virgilcrypto.PublicKey, err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			var ok bool
-			err, ok = r.(error)
-			if !ok {
-				err = fmt.Errorf("pkg: %v", r)
-			}
-		}
-	}()
-
-	vdata := ToVirgilByteArray(unwrapKey(data))
-	defer DeleteVirgilByteArray(vdata)
-	vder := VirgilKeyPairPublicKeyToDER(vdata)
-	defer DeleteVirgilByteArray(vder)
-	rawPub := ToSlice(vder)
+	rawPub := unwrapKey(data)
 	receiverId := c.CalculateFingerprint(rawPub)
 
 	return &nativePublicKey{
