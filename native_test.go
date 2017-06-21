@@ -177,3 +177,43 @@ func TestStreamSigner(t *testing.T) {
 	}
 
 }
+
+func TestNativeCrypto_ExportImportPrivateKey(t *testing.T) {
+	crypto := &NativeCrypto{}
+	keypair, err := crypto.GenerateKeypair()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	pubb, err := crypto.ExportPublicKey(keypair.PublicKey())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	privb, err := crypto.ExportPrivateKey(keypair.PrivateKey(), "abc")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	pub, err := crypto.ImportPublicKey(pubb)
+	if err != nil {
+		t.Fatal(err)
+	}
+	priv, err := crypto.ImportPrivateKey(privb, "abc")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	data := make([]byte, 257)
+	rand.Read(data)
+
+	cipherText, err := crypto.SignThenEncrypt(data, keypair.PrivateKey(), keypair.PublicKey())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if plaintext, err := crypto.DecryptThenVerify(cipherText, priv, pub, pub); err != nil || !bytes.Equal(plaintext, data) {
+		t.Fatal(err)
+	}
+
+}
