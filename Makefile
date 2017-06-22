@@ -1,5 +1,5 @@
 TEMPDIR := $(shell mktemp -d)
-BRANCH ?=v2.0.4
+BRANCH ?=v2.1.2
 
 all:
 	git clone --branch=$(BRANCH) https://github.com/VirgilSecurity/virgil-crypto.git $(TEMPDIR)
