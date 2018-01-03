@@ -1,9 +1,10 @@
 package virgil_crypto_go
 
 import (
-	"testing"
 	"bytes"
 	"crypto/rand"
+	"crypto/sha256"
+	"testing"
 )
 
 func TestSignEncrypt(t *testing.T) {
@@ -34,7 +35,32 @@ func TestSignEncrypt(t *testing.T) {
 
 }
 
-func BenchmarkSignThenEncrypt(b *testing.B){
+func TestSignVerifyHash(t *testing.T) {
+	crypto := &NativeCrypto{}
+
+	//make random data
+	data := make([]byte, 257)
+	rand.Read(data)
+
+	hash := sha256.Sum256(data)
+
+	signerKeypair, err := crypto.GenerateKeypair()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	signature, err := crypto.SignHash(hash[:], signerKeypair.PrivateKey())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if res, err := crypto.VerifyHash(hash[:], signature, signerKeypair.PublicKey()); err != nil || !res {
+		t.Fatal(err)
+	}
+
+}
+
+func BenchmarkSignThenEncrypt(b *testing.B) {
 
 	crypto := &NativeCrypto{}
 
@@ -52,8 +78,7 @@ func BenchmarkSignThenEncrypt(b *testing.B){
 		b.Fatal(err)
 	}
 
-
-	for i := 0; i< b.N; i++{
+	for i := 0; i < b.N; i++ {
 		cipherText, err := crypto.SignThenEncrypt(data, signerKeypair.PrivateKey(), keypair.PublicKey())
 		if err != nil {
 			b.Fatal(err)
@@ -64,7 +89,6 @@ func BenchmarkSignThenEncrypt(b *testing.B){
 	}
 
 }
-
 
 func TestStreamCipher(t *testing.T) {
 	crypto := &NativeCrypto{}
@@ -124,7 +148,6 @@ func TestStreamCipher(t *testing.T) {
 
 }
 
-
 func TestStreamSigner(t *testing.T) {
 	crypto := &NativeCrypto{}
 	keypair, err := crypto.GenerateKeypair()
@@ -144,7 +167,7 @@ func TestStreamSigner(t *testing.T) {
 
 	plain = bytes.NewBuffer(plainBuf)
 
-	res, err := crypto.VerifyStream(plain,sign, keypair.PublicKey())
+	res, err := crypto.VerifyStream(plain, sign, keypair.PublicKey())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -157,8 +180,7 @@ func TestStreamSigner(t *testing.T) {
 
 	plain = bytes.NewBuffer(plainBuf)
 
-
-	sign[len(sign)-1] = ^sign[len(sign)-1]//invert last byte
+	sign[len(sign)-1] = ^sign[len(sign)-1] //invert last byte
 
 	res, err = crypto.VerifyStream(plain, sign, keypair.PublicKey())
 	if res {

@@ -1,12 +1,12 @@
 package virgil_crypto_go
 
 import (
-	"io"
 	"crypto/sha256"
-	"github.com/pkg/errors"
-	"fmt"
-	"gopkg.in/virgil.v4/virgilcrypto"
 	"crypto/subtle"
+	"fmt"
+	"github.com/pkg/errors"
+	"gopkg.in/virgil.v4/virgilcrypto"
+	"io"
 )
 
 type NativeCrypto struct {
@@ -15,11 +15,11 @@ type NativeCrypto struct {
 
 const (
 	signatureKey = "VIRGIL-DATA-SIGNATURE"
-	signerId = "VIRGIL-DATA-SIGNER-ID"
+	signerId     = "VIRGIL-DATA-SIGNER-ID"
 )
 
 func (c *NativeCrypto) SetKeyType(keyType virgilcrypto.KeyType) error {
-	if _, ok := KeyTypeMap[keyType]; !ok{
+	if _, ok := KeyTypeMap[keyType]; !ok {
 		return errors.New("key type not supported")
 	} else {
 		c.keyType = keyType
@@ -40,12 +40,12 @@ func (c *NativeCrypto) GenerateKeypair() (_ virgilcrypto.Keypair, err error) {
 	}()
 
 	keyType, ok := KeyTypeMap[c.keyType]
-	if !ok{
+	if !ok {
 		return nil, errors.New("This key type is not supported")
 	}
 
 	kp := VirgilKeyPairGenerate(keyType)
-	defer  DeleteVirgilKeyPair(kp)
+	defer DeleteVirgilKeyPair(kp)
 
 	der := VirgilKeyPairPublicKeyToDER(kp.PublicKey())
 	defer DeleteVirgilByteArray(der)
@@ -54,25 +54,22 @@ func (c *NativeCrypto) GenerateKeypair() (_ virgilcrypto.Keypair, err error) {
 	receiverId := c.CalculateFingerprint(rawPub)
 
 	pub := &nativePublicKey{
-		key:rawPub,
-		receiverID:receiverId,
+		key:        rawPub,
+		receiverID: receiverId,
 	}
-
 
 	der1 := VirgilKeyPairPrivateKeyToDER(kp.PrivateKey())
 	defer DeleteVirgilByteArray(der1)
 	rawPriv := ToSlice(der1)
 
 	priv := &nativePrivateKey{
-		key:rawPriv,
-		receiverID:receiverId,
+		key:        rawPriv,
+		receiverID: receiverId,
 	}
 
-
-
 	return &nativeKeypair{
-		publicKey:pub,
-		privateKey:priv,
+		publicKey:  pub,
+		privateKey: priv,
 	}, nil
 }
 
@@ -89,7 +86,7 @@ func (c *NativeCrypto) ImportPrivateKey(data []byte, password string) (_ virgilc
 	var rawPriv []byte
 
 	unwrappedKey := unwrapKey(data)
-	if(password == ""){
+	if password == "" {
 		rawPriv = unwrappedKey
 	} else {
 
@@ -117,8 +114,8 @@ func (c *NativeCrypto) ImportPrivateKey(data []byte, password string) (_ virgilc
 	receiverId := c.CalculateFingerprint(rawPub)
 
 	return &nativePrivateKey{
-		key:rawPriv,
-		receiverID:receiverId,
+		key:        rawPriv,
+		receiverID: receiverId,
 	}, nil
 }
 
@@ -127,8 +124,8 @@ func (c *NativeCrypto) ImportPublicKey(data []byte) (_ virgilcrypto.PublicKey, e
 	receiverId := c.CalculateFingerprint(rawPub)
 
 	return &nativePublicKey{
-		key:rawPub,
-		receiverID:receiverId,
+		key:        rawPub,
+		receiverID: receiverId,
 	}, nil
 
 }
@@ -173,10 +170,10 @@ func (c *NativeCrypto) Encrypt(data []byte, recipients ...virgilcrypto.PublicKey
 	ci := NewVirgilCipher()
 	defer DeleteVirgilCipher(ci)
 
-	for _,r := range recipients{
+	for _, r := range recipients {
 		rec := r.(*nativePublicKey)
 
-		vrec :=ToVirgilByteArray(rec.ReceiverID())
+		vrec := ToVirgilByteArray(rec.ReceiverID())
 		defer DeleteVirgilByteArray(vrec)
 		vcon := ToVirgilByteArray(rec.contents())
 		defer DeleteVirgilByteArray(vcon)
@@ -193,7 +190,7 @@ func (c *NativeCrypto) Encrypt(data []byte, recipients ...virgilcrypto.PublicKey
 	return ct, nil
 }
 
-func (c *NativeCrypto) EncryptStream(in io.Reader, out io.Writer, recipients ...virgilcrypto.PublicKey) ( err error) {
+func (c *NativeCrypto) EncryptStream(in io.Reader, out io.Writer, recipients ...virgilcrypto.PublicKey) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -213,7 +210,7 @@ func (c *NativeCrypto) EncryptStream(in io.Reader, out io.Writer, recipients ...
 	ci := NewVirgilStreamCipher()
 	defer DeleteVirgilStreamCipher(ci)
 
-	for _,r := range recipients{
+	for _, r := range recipients {
 		rec := r.(*nativePublicKey)
 		vrec := ToVirgilByteArray(rec.ReceiverID())
 		defer DeleteVirgilByteArray(vrec)
@@ -224,10 +221,9 @@ func (c *NativeCrypto) EncryptStream(in io.Reader, out io.Writer, recipients ...
 
 	}
 
-
 	ci.Encrypt(s, d)
 
-  	return
+	return
 
 }
 
@@ -246,7 +242,7 @@ func (c *NativeCrypto) Decrypt(data []byte, key virgilcrypto.PrivateKey) (_ []by
 	defer DeleteVirgilCipher(ci)
 
 	k, ok := key.(*nativePrivateKey)
-	if !ok{
+	if !ok {
 		return
 	}
 
@@ -258,7 +254,7 @@ func (c *NativeCrypto) Decrypt(data []byte, key virgilcrypto.PrivateKey) (_ []by
 	defer DeleteVirgilByteArray(vcontents)
 
 	vplain := ci.DecryptWithKey(vdata, vrec, vcontents)
-	defer  DeleteVirgilByteArray(vplain)
+	defer DeleteVirgilByteArray(vplain)
 	plainText := ToSlice(vplain)
 	return plainText, nil
 }
@@ -279,12 +275,11 @@ func (c *NativeCrypto) DecryptStream(in io.Reader, out io.Writer, key virgilcryp
 	s := NewDirectorVirgilDataSource(NewDataSource(in))
 	defer DeleteDirectorVirgilDataSource(s)
 
-
 	ci := NewVirgilStreamCipher()
 	defer DeleteVirgilStreamCipher(ci)
 
 	k, ok := key.(*nativePrivateKey)
-	if !ok{
+	if !ok {
 		return errors.New(" key is not native key")
 	}
 
@@ -313,7 +308,7 @@ func (c *NativeCrypto) Sign(data []byte, signer virgilcrypto.PrivateKey) (_ []by
 	s := NewVirgilSigner()
 	defer DeleteVirgilSigner(s)
 	k, ok := signer.(*nativePrivateKey)
-	if !ok{
+	if !ok {
 		return nil, errors.New("wrong private key type")
 	}
 
@@ -324,6 +319,34 @@ func (c *NativeCrypto) Sign(data []byte, signer virgilcrypto.PrivateKey) (_ []by
 	vsign := s.Sign(vdata, vkey)
 	defer DeleteVirgilByteArray(vsign)
 
+	signature := ToSlice(vsign)
+	return signature, nil
+}
+
+func (c *NativeCrypto) SignHash(hash []byte, signer virgilcrypto.PrivateKey) (_ []byte, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			var ok bool
+			err, ok = r.(error)
+			if !ok {
+				err = fmt.Errorf("pkg: %v", r)
+			}
+		}
+	}()
+
+	s := NewVirgilSignerBase(VirgilHashAlgorithm_SHA256)
+	defer DeleteVirgilSignerBase(s)
+	k, ok := signer.(*nativePrivateKey)
+	if !ok {
+		return nil, errors.New("wrong private key type")
+	}
+
+	vdata := ToVirgilByteArray(hash)
+	defer DeleteVirgilByteArray(vdata)
+	vkey := ToVirgilByteArray(k.key)
+	defer DeleteVirgilByteArray(vkey)
+	vsign := s.SignHash(vdata, vkey)
+	defer DeleteVirgilByteArray(vsign)
 
 	signature := ToSlice(vsign)
 	return signature, nil
@@ -350,6 +373,30 @@ func (c *NativeCrypto) Verify(data []byte, signature []byte, key virgilcrypto.Pu
 	defer DeleteVirgilByteArray(vcontents)
 
 	valid := s.Verify(vdata, vsignature, vcontents)
+	return valid, nil
+}
+
+func (c *NativeCrypto) VerifyHash(hash []byte, signature []byte, key virgilcrypto.PublicKey) (_ bool, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			var ok bool
+			err, ok = r.(error)
+			if !ok {
+				err = fmt.Errorf("pkg: %v", r)
+			}
+		}
+	}()
+	s := NewVirgilSignerBase(VirgilHashAlgorithm_SHA256)
+	defer DeleteVirgilSignerBase(s)
+
+	vdata := ToVirgilByteArray(hash)
+	defer DeleteVirgilByteArray(vdata)
+	vsignature := ToVirgilByteArray(signature)
+	defer DeleteVirgilByteArray(vsignature)
+	vcontents := ToVirgilByteArray(key.(*nativePublicKey).contents())
+	defer DeleteVirgilByteArray(vcontents)
+
+	valid := s.VerifyHash(vdata, vsignature, vcontents)
 	return valid, nil
 }
 
@@ -401,7 +448,6 @@ func (c *NativeCrypto) VerifyStream(in io.Reader, signature []byte, key virgilcr
 	vsign := ToVirgilByteArray(signature)
 	defer DeleteVirgilByteArray(vsign)
 
-
 	vcontents := ToVirgilByteArray(key.(*nativePublicKey).contents())
 	defer DeleteVirgilByteArray(vcontents)
 
@@ -429,7 +475,7 @@ func (c *NativeCrypto) SignThenEncrypt(data []byte, signerKey virgilcrypto.Priva
 	params := ci.CustomParams().(VirgilCustomParams)
 
 	signature, err := c.Sign(data, signerKey)
-	if(err != nil){
+	if err != nil {
 		return nil, err
 	}
 	vsigKey := ToVirgilByteArray([]byte(signatureKey))
@@ -439,15 +485,13 @@ func (c *NativeCrypto) SignThenEncrypt(data []byte, signerKey virgilcrypto.Priva
 	defer DeleteVirgilByteArray(vsig)
 	params.SetString(vsigKey, vsig)
 
-
 	vsignerKey := ToVirgilByteArray([]byte(signerId))
 	defer DeleteVirgilByteArray(vsignerKey)
 	vsigner := ToVirgilByteArray(signerKey.ReceiverID())
 	defer DeleteVirgilByteArray(vsigner)
 	params.SetString(vsignerKey, vsigner)
 
-
-	for _,r := range recipients{
+	for _, r := range recipients {
 		vrec := ToVirgilByteArray(r.ReceiverID())
 		defer DeleteVirgilByteArray(vrec)
 		vconts := ToVirgilByteArray(r.(*nativePublicKey).contents())
@@ -457,7 +501,7 @@ func (c *NativeCrypto) SignThenEncrypt(data []byte, signerKey virgilcrypto.Priva
 
 	vdata := ToVirgilByteArray(data)
 	defer DeleteVirgilByteArray(vdata)
-	venc :=ci.Encrypt(vdata, true)
+	venc := ci.Encrypt(vdata, true)
 	defer DeleteVirgilByteArray(venc)
 	ct := ToSlice(venc)
 
@@ -475,9 +519,6 @@ func (c *NativeCrypto) DecryptThenVerify(data []byte, decryptionKey virgilcrypto
 		}
 	}()
 
-
-
-
 	ci := NewVirgilCipher()
 	defer DeleteVirgilCipher(ci)
 
@@ -492,7 +533,6 @@ func (c *NativeCrypto) DecryptThenVerify(data []byte, decryptionKey virgilcrypto
 
 	plaintext := ToSlice(vpt)
 
-
 	vsigKey := ToVirgilByteArray([]byte(signatureKey))
 	defer DeleteVirgilByteArray(vsigKey)
 	sigString := ci.CustomParams().(VirgilCustomParams).GetString(vsigKey)
@@ -502,15 +542,15 @@ func (c *NativeCrypto) DecryptThenVerify(data []byte, decryptionKey virgilcrypto
 
 	if len(verifierKeys) == 1 {
 		valid, err := c.Verify(plaintext, sig, verifierKeys[0])
-		if(!valid){
+		if !valid {
 			return nil, err
 		}
 
-		if err != nil{
+		if err != nil {
 			return nil, err
 		}
 
-	}else {
+	} else {
 		vsignerIdKey := ToVirgilByteArray([]byte(signerId))
 		defer DeleteVirgilByteArray(vsignerIdKey)
 		signerIdString := ci.CustomParams().(VirgilCustomParams).GetString(vsignerIdKey)
@@ -518,13 +558,13 @@ func (c *NativeCrypto) DecryptThenVerify(data []byte, decryptionKey virgilcrypto
 
 		signerIdValue := ToSlice(signerIdString)
 
-		for _, v := range verifierKeys{
-			if subtle.ConstantTimeCompare(v.ReceiverID(), signerIdValue) == 1{
+		for _, v := range verifierKeys {
+			if subtle.ConstantTimeCompare(v.ReceiverID(), signerIdValue) == 1 {
 				valid, err := c.Verify(plaintext, sig, v)
-				if(!valid){
+				if !valid {
 					return nil, err
 				}
-				if err != nil{
+				if err != nil {
 					return nil, err
 				}
 				return plaintext, nil
@@ -534,12 +574,10 @@ func (c *NativeCrypto) DecryptThenVerify(data []byte, decryptionKey virgilcrypto
 
 	}
 
-
-
 	return plaintext, nil
 }
 
-func (c *NativeCrypto) ExtractPublicKey(key virgilcrypto.PrivateKey) (_ virgilcrypto.PublicKey, err error){
+func (c *NativeCrypto) ExtractPublicKey(key virgilcrypto.PrivateKey) (_ virgilcrypto.PublicKey, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -551,7 +589,7 @@ func (c *NativeCrypto) ExtractPublicKey(key virgilcrypto.PrivateKey) (_ virgilcr
 	}()
 
 	k, ok := key.(*nativePrivateKey)
-	if !ok{
+	if !ok {
 		return nil, errors.New("the key is not native private key")
 	}
 	return k.ExtractPublicKey()
@@ -559,20 +597,20 @@ func (c *NativeCrypto) ExtractPublicKey(key virgilcrypto.PrivateKey) (_ virgilcr
 }
 
 //ToSlice converts VirgilByteArray to a go slice
-func ToSlice(b VirgilByteArray) []byte{
+func ToSlice(b VirgilByteArray) []byte {
 	l := int(b.Size())
 	res := make([]byte, l)
-	for i:= 0; i < l; i++{
+	for i := 0; i < l; i++ {
 		res[i] = b.Get(i)
 	}
 	return res
 }
 
 //ToVirgilByteArray converts go slice to a VirgilByteArray
-func ToVirgilByteArray(data []byte) VirgilByteArray{
+func ToVirgilByteArray(data []byte) VirgilByteArray {
 	l := len(data)
 	b := NewVirgilByteArray(uint(len(data)))
-	for i:= 0; i < l; i++{
+	for i := 0; i < l; i++ {
 		b.Set(i, data[i])
 	}
 	return b
