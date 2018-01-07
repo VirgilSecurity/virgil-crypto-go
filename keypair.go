@@ -6,21 +6,21 @@ import (
 	"gopkg.in/virgil.v6/crypto-native"
 )
 
-type nativeKeypair struct {
+type externalKeypair struct {
 	publicKey  *nativePublicKey
 	privateKey *nativePrivateKey
 }
 
-func (e *nativeKeypair) HasPublic() bool {
+func (e *externalKeypair) HasPublic() bool {
 	return e.publicKey != nil && !e.publicKey.Empty()
 }
-func (e *nativeKeypair) HasPrivate() bool {
+func (e *externalKeypair) HasPrivate() bool {
 	return e.privateKey != nil && !e.privateKey.Empty()
 }
-func (e *nativeKeypair) PublicKey() cryptonative.PublicKey {
+func (e *externalKeypair) PublicKey() cryptonative.PublicKey {
 	return e.publicKey
 }
-func (e *nativeKeypair) PrivateKey() cryptonative.PrivateKey {
+func (e *externalKeypair) PrivateKey() cryptonative.PrivateKey {
 	return e.privateKey
 }
 
