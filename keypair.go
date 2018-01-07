@@ -7,8 +7,8 @@ import (
 )
 
 type externalKeypair struct {
-	publicKey  *nativePublicKey
-	privateKey *nativePrivateKey
+	publicKey  *externalPublicKey
+	privateKey *externalPrivateKey
 }
 
 func (e *externalKeypair) HasPublic() bool {

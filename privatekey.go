@@ -2,20 +2,20 @@ package virgil_crypto_go
 
 import "gopkg.in/virgil.v6/crypto-native"
 
-type nativePrivateKey struct {
+type externalPrivateKey struct {
 	receiverID []byte
 	key        []byte
 }
 
-func (k *nativePrivateKey) contents() []byte {
+func (k *externalPrivateKey) contents() []byte {
 	return k.key
 }
 
-func (k *nativePrivateKey) ReceiverID() []byte {
+func (k *externalPrivateKey) ReceiverID() []byte {
 	return k.receiverID
 }
 
-func (k *nativePrivateKey) Encode(password []byte) ([]byte, error) {
+func (k *externalPrivateKey) Encode(password []byte) ([]byte, error) {
 	if len(password) == 0 {
 
 		vkey := ToVirgilByteArray(k.key)
@@ -33,11 +33,11 @@ func (k *nativePrivateKey) Encode(password []byte) ([]byte, error) {
 	}
 }
 
-func (k *nativePrivateKey) Empty() bool {
+func (k *externalPrivateKey) Empty() bool {
 	return k == nil || len(k.key) == 0
 }
 
-func (k *nativePrivateKey) ExtractPublicKey() (cryptonative.PublicKey, error) {
+func (k *externalPrivateKey) ExtractPublicKey() (cryptonative.PublicKey, error) {
 	vkey := ToVirgilByteArray(k.key)
 	defer DeleteVirgilByteArray(vkey)
 	vempty := ToVirgilByteArray(make([]byte, 0))
@@ -48,7 +48,7 @@ func (k *nativePrivateKey) ExtractPublicKey() (cryptonative.PublicKey, error) {
 	defer DeleteVirgilByteArray(vder)
 
 	derPub := ToSlice(vder)
-	return &nativePublicKey{
+	return &externalPublicKey{
 		key:        derPub,
 		receiverID: k.receiverID,
 	}, nil
