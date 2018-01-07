@@ -1,9 +1,9 @@
 package virgil_crypto_go
 
 import (
-	"gopkg.in/virgil.v4/virgilcrypto"
 	"encoding/base64"
 	"encoding/pem"
+	"gopkg.in/virgil.v6/crypto-native"
 )
 
 type nativeKeypair struct {
@@ -17,19 +17,19 @@ func (e *nativeKeypair) HasPublic() bool {
 func (e *nativeKeypair) HasPrivate() bool {
 	return e.privateKey != nil && !e.privateKey.Empty()
 }
-func (e *nativeKeypair) PublicKey() virgilcrypto.PublicKey {
+func (e *nativeKeypair) PublicKey() cryptonative.PublicKey {
 	return e.publicKey
 }
-func (e *nativeKeypair) PrivateKey() virgilcrypto.PrivateKey {
+func (e *nativeKeypair) PrivateKey() cryptonative.PrivateKey {
 	return e.privateKey
 }
 
-func unwrapKey(key []byte) ([]byte) {
+func unwrapKey(key []byte) []byte {
 
 	block, _ := pem.Decode(key)
 	if block != nil {
 		return block.Bytes
-	} else{
+	} else {
 		buf := make([]byte, base64.StdEncoding.DecodedLen(len(key)))
 
 		read, err := base64.StdEncoding.Decode(buf, key)

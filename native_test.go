@@ -8,7 +8,7 @@ import (
 )
 
 func TestSignEncrypt(t *testing.T) {
-	crypto := &NativeCrypto{}
+	crypto := &ExternalCrypto{}
 
 	//make random data
 	data := make([]byte, 257)
@@ -36,7 +36,7 @@ func TestSignEncrypt(t *testing.T) {
 }
 
 func TestSignVerifyHash(t *testing.T) {
-	crypto := &NativeCrypto{}
+	crypto := &ExternalCrypto{}
 
 	//make random data
 	data := make([]byte, 257)
@@ -62,7 +62,7 @@ func TestSignVerifyHash(t *testing.T) {
 
 func BenchmarkSignThenEncrypt(b *testing.B) {
 
-	crypto := &NativeCrypto{}
+	crypto := &ExternalCrypto{}
 
 	//make random data
 	data := make([]byte, 257)
@@ -91,7 +91,7 @@ func BenchmarkSignThenEncrypt(b *testing.B) {
 }
 
 func TestStreamCipher(t *testing.T) {
-	crypto := &NativeCrypto{}
+	crypto := &ExternalCrypto{}
 	keypair, err := crypto.GenerateKeypair()
 	if err != nil {
 		t.Fatal(err)
@@ -149,7 +149,7 @@ func TestStreamCipher(t *testing.T) {
 }
 
 func TestStreamSigner(t *testing.T) {
-	crypto := &NativeCrypto{}
+	crypto := &ExternalCrypto{}
 	keypair, err := crypto.GenerateKeypair()
 	if err != nil {
 		t.Fatal(err)
@@ -201,7 +201,7 @@ func TestStreamSigner(t *testing.T) {
 }
 
 func TestNativeCrypto_ExportImportPrivateKey(t *testing.T) {
-	crypto := &NativeCrypto{}
+	crypto := &ExternalCrypto{}
 	keypair, err := crypto.GenerateKeypair()
 	if err != nil {
 		t.Fatal(err)

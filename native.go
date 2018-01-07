@@ -5,12 +5,12 @@ import (
 	"crypto/subtle"
 	"fmt"
 	"github.com/pkg/errors"
-	"gopkg.in/virgil.v4/virgilcrypto"
+	"gopkg.in/virgil.v6/crypto-native"
 	"io"
 )
 
-type NativeCrypto struct {
-	keyType virgilcrypto.KeyType
+type ExternalCrypto struct {
+	keyType cryptonative.KeyType
 }
 
 const (
@@ -18,7 +18,7 @@ const (
 	signerId     = "VIRGIL-DATA-SIGNER-ID"
 )
 
-func (c *NativeCrypto) SetKeyType(keyType virgilcrypto.KeyType) error {
+func (c *ExternalCrypto) SetKeyType(keyType cryptonative.KeyType) error {
 	if _, ok := KeyTypeMap[keyType]; !ok {
 		return errors.New("key type not supported")
 	} else {
@@ -27,7 +27,7 @@ func (c *NativeCrypto) SetKeyType(keyType virgilcrypto.KeyType) error {
 	}
 }
 
-func (c *NativeCrypto) GenerateKeypair() (_ virgilcrypto.Keypair, err error) {
+func (c *ExternalCrypto) GenerateKeypair() (_ cryptonative.Keypair, err error) {
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -73,7 +73,7 @@ func (c *NativeCrypto) GenerateKeypair() (_ virgilcrypto.Keypair, err error) {
 	}, nil
 }
 
-func (c *NativeCrypto) ImportPrivateKey(data []byte, password string) (_ virgilcrypto.PrivateKey, err error) {
+func (c *ExternalCrypto) ImportPrivateKey(data []byte, password string) (_ cryptonative.PrivateKey, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -119,7 +119,7 @@ func (c *NativeCrypto) ImportPrivateKey(data []byte, password string) (_ virgilc
 	}, nil
 }
 
-func (c *NativeCrypto) ImportPublicKey(data []byte) (_ virgilcrypto.PublicKey, err error) {
+func (c *ExternalCrypto) ImportPublicKey(data []byte) (_ cryptonative.PublicKey, err error) {
 	rawPub := unwrapKey(data)
 	receiverId := c.CalculateFingerprint(rawPub)
 
@@ -130,7 +130,7 @@ func (c *NativeCrypto) ImportPublicKey(data []byte) (_ virgilcrypto.PublicKey, e
 
 }
 
-func (c *NativeCrypto) ExportPrivateKey(key virgilcrypto.PrivateKey, password string) (_ []byte, err error) {
+func (c *ExternalCrypto) ExportPrivateKey(key cryptonative.PrivateKey, password string) (_ []byte, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -143,7 +143,7 @@ func (c *NativeCrypto) ExportPrivateKey(key virgilcrypto.PrivateKey, password st
 	return key.Encode([]byte(password))
 }
 
-func (c *NativeCrypto) ExportPublicKey(key virgilcrypto.PublicKey) (_ []byte, err error) {
+func (c *ExternalCrypto) ExportPublicKey(key cryptonative.PublicKey) (_ []byte, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -156,7 +156,7 @@ func (c *NativeCrypto) ExportPublicKey(key virgilcrypto.PublicKey) (_ []byte, er
 	return key.Encode()
 }
 
-func (c *NativeCrypto) Encrypt(data []byte, recipients ...virgilcrypto.PublicKey) (_ []byte, err error) {
+func (c *ExternalCrypto) Encrypt(data []byte, recipients ...cryptonative.PublicKey) (_ []byte, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -190,7 +190,7 @@ func (c *NativeCrypto) Encrypt(data []byte, recipients ...virgilcrypto.PublicKey
 	return ct, nil
 }
 
-func (c *NativeCrypto) EncryptStream(in io.Reader, out io.Writer, recipients ...virgilcrypto.PublicKey) (err error) {
+func (c *ExternalCrypto) EncryptStream(in io.Reader, out io.Writer, recipients ...cryptonative.PublicKey) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -227,7 +227,7 @@ func (c *NativeCrypto) EncryptStream(in io.Reader, out io.Writer, recipients ...
 
 }
 
-func (c *NativeCrypto) Decrypt(data []byte, key virgilcrypto.PrivateKey) (_ []byte, err error) {
+func (c *ExternalCrypto) Decrypt(data []byte, key cryptonative.PrivateKey) (_ []byte, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -259,7 +259,7 @@ func (c *NativeCrypto) Decrypt(data []byte, key virgilcrypto.PrivateKey) (_ []by
 	return plainText, nil
 }
 
-func (c *NativeCrypto) DecryptStream(in io.Reader, out io.Writer, key virgilcrypto.PrivateKey) (err error) {
+func (c *ExternalCrypto) DecryptStream(in io.Reader, out io.Writer, key cryptonative.PrivateKey) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -294,7 +294,7 @@ func (c *NativeCrypto) DecryptStream(in io.Reader, out io.Writer, key virgilcryp
 	return
 }
 
-func (c *NativeCrypto) Sign(data []byte, signer virgilcrypto.PrivateKey) (_ []byte, err error) {
+func (c *ExternalCrypto) Sign(data []byte, signer cryptonative.PrivateKey) (_ []byte, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -323,7 +323,7 @@ func (c *NativeCrypto) Sign(data []byte, signer virgilcrypto.PrivateKey) (_ []by
 	return signature, nil
 }
 
-func (c *NativeCrypto) SignHash(hash []byte, signer virgilcrypto.PrivateKey) (_ []byte, err error) {
+func (c *ExternalCrypto) SignHash(hash []byte, signer cryptonative.PrivateKey) (_ []byte, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -352,7 +352,7 @@ func (c *NativeCrypto) SignHash(hash []byte, signer virgilcrypto.PrivateKey) (_ 
 	return signature, nil
 }
 
-func (c *NativeCrypto) Verify(data []byte, signature []byte, key virgilcrypto.PublicKey) (_ bool, err error) {
+func (c *ExternalCrypto) Verify(data []byte, signature []byte, key cryptonative.PublicKey) (_ bool, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -376,7 +376,7 @@ func (c *NativeCrypto) Verify(data []byte, signature []byte, key virgilcrypto.Pu
 	return valid, nil
 }
 
-func (c *NativeCrypto) VerifyHash(hash []byte, signature []byte, key virgilcrypto.PublicKey) (_ bool, err error) {
+func (c *ExternalCrypto) VerifyHash(hash []byte, signature []byte, key cryptonative.PublicKey) (_ bool, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -400,7 +400,7 @@ func (c *NativeCrypto) VerifyHash(hash []byte, signature []byte, key virgilcrypt
 	return valid, nil
 }
 
-func (c *NativeCrypto) SignStream(in io.Reader, signerKey virgilcrypto.PrivateKey) (_ []byte, err error) {
+func (c *ExternalCrypto) SignStream(in io.Reader, signerKey cryptonative.PrivateKey) (_ []byte, err error) {
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -427,7 +427,7 @@ func (c *NativeCrypto) SignStream(in io.Reader, signerKey virgilcrypto.PrivateKe
 	return ToSlice(vsign), nil
 }
 
-func (c *NativeCrypto) VerifyStream(in io.Reader, signature []byte, key virgilcrypto.PublicKey) (res bool, err error) {
+func (c *ExternalCrypto) VerifyStream(in io.Reader, signature []byte, key cryptonative.PublicKey) (res bool, err error) {
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -455,12 +455,12 @@ func (c *NativeCrypto) VerifyStream(in io.Reader, signature []byte, key virgilcr
 
 	return res, nil
 }
-func (c *NativeCrypto) CalculateFingerprint(data []byte) []byte {
+func (c *ExternalCrypto) CalculateFingerprint(data []byte) []byte {
 	hash := sha256.Sum256(data)
 	return hash[:]
 }
 
-func (c *NativeCrypto) SignThenEncrypt(data []byte, signerKey virgilcrypto.PrivateKey, recipients ...virgilcrypto.PublicKey) (_ []byte, err error) {
+func (c *ExternalCrypto) SignThenEncrypt(data []byte, signerKey cryptonative.PrivateKey, recipients ...cryptonative.PublicKey) (_ []byte, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -508,7 +508,7 @@ func (c *NativeCrypto) SignThenEncrypt(data []byte, signerKey virgilcrypto.Priva
 	return ct, nil
 }
 
-func (c *NativeCrypto) DecryptThenVerify(data []byte, decryptionKey virgilcrypto.PrivateKey, verifierKeys ...virgilcrypto.PublicKey) (_ []byte, err error) {
+func (c *ExternalCrypto) DecryptThenVerify(data []byte, decryptionKey cryptonative.PrivateKey, verifierKeys ...cryptonative.PublicKey) (_ []byte, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -570,14 +570,14 @@ func (c *NativeCrypto) DecryptThenVerify(data []byte, decryptionKey virgilcrypto
 				return plaintext, nil
 			}
 		}
-		return nil, virgilcrypto.CryptoError("Could not verify signature with provided keys")
+		return nil, cryptonative.CryptoError("Could not verify signature with provided keys")
 
 	}
 
 	return plaintext, nil
 }
 
-func (c *NativeCrypto) ExtractPublicKey(key virgilcrypto.PrivateKey) (_ virgilcrypto.PublicKey, err error) {
+func (c *ExternalCrypto) ExtractPublicKey(key cryptonative.PrivateKey) (_ cryptonative.PublicKey, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
