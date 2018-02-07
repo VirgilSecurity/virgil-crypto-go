@@ -49,12 +49,12 @@ func TestSignVerifyHash(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	signature, err := crypto.SignHash(hash[:], signerKeypair.PrivateKey())
+	signature, err := crypto.SignHash(HASH_TYPE_SHA256, hash[:], signerKeypair.PrivateKey())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if res, err := crypto.VerifyHash(hash[:], signature, signerKeypair.PublicKey()); err != nil || !res {
+	if res, err := crypto.VerifyHash(HASH_TYPE_SHA256, hash[:], signature, signerKeypair.PublicKey()); err != nil || !res {
 		t.Fatal(err)
 	}
 

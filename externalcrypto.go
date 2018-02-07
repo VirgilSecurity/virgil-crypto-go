@@ -55,6 +55,18 @@ const (
 	signerId     = "VIRGIL-DATA-SIGNER-ID"
 )
 
+const (
+	HASH_TYPE_SHA256 = iota
+	HASH_TYPE_SHA384
+	HASH_TYPE_SHA512
+)
+
+var hashTypes = map[int]VirgilCryptoFoundationVirgilHashAlgorithm{
+	HASH_TYPE_SHA256: VirgilHashAlgorithm_SHA256,
+	HASH_TYPE_SHA384: VirgilHashAlgorithm_SHA384,
+	HASH_TYPE_SHA512: VirgilHashAlgorithm_SHA512,
+}
+
 func (c *ExternalCrypto) SetKeyType(keyType cryptonative.KeyType) error {
 	if _, ok := KeyTypeMap[keyType]; !ok {
 		return errors.New("key type not supported")
@@ -369,7 +381,7 @@ func (c *ExternalCrypto) Sign(data []byte, signer cryptoapi.PrivateKey) (_ []byt
 	return signature, nil
 }
 
-func (c *ExternalCrypto) SignHash(hash []byte, signer cryptoapi.PrivateKey) (_ []byte, err error) {
+func (c *ExternalCrypto) SignHash(hashType int, hash []byte, signer cryptoapi.PrivateKey) (_ []byte, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -380,7 +392,12 @@ func (c *ExternalCrypto) SignHash(hash []byte, signer cryptoapi.PrivateKey) (_ [
 		}
 	}()
 
-	s := NewVirgilSignerBase(VirgilHashAlgorithm_SHA256)
+	alg, ok := hashTypes[hashType]
+	if !ok {
+		return nil, errors.New("invalid hash algorithm")
+	}
+
+	s := NewVirgilSignerBase(alg)
 	defer DeleteVirgilSignerBase(s)
 	k, ok := signer.(*externalPrivateKey)
 	if !ok {
@@ -427,7 +444,7 @@ func (c *ExternalCrypto) VerifySignature(data []byte, signature []byte, key cryp
 	return nil
 }
 
-func (c *ExternalCrypto) VerifyHash(hash []byte, signature []byte, key cryptoapi.PublicKey) (_ bool, err error) {
+func (c *ExternalCrypto) VerifyHash(hashType int, hash []byte, signature []byte, key cryptoapi.PublicKey) (_ bool, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -437,7 +454,12 @@ func (c *ExternalCrypto) VerifyHash(hash []byte, signature []byte, key cryptoapi
 			}
 		}
 	}()
-	s := NewVirgilSignerBase(VirgilHashAlgorithm_SHA256)
+	alg, ok := hashTypes[hashType]
+	if !ok {
+		return false, errors.New("invalid hash algorithm")
+	}
+
+	s := NewVirgilSignerBase(alg)
 	defer DeleteVirgilSignerBase(s)
 
 	vdata := ToVirgilByteArray(hash)
