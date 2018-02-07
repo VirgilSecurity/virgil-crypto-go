@@ -4,17 +4,17 @@ Crypto implementation which uses wrapper for [c++ crypto library](https://github
 ## Hot to build
 The package is supported only Linux and Mac OS X. Please make sure [all dependencis](https://github.com/VirgilSecurity/virgil-crypto#build-prerequisites) are installed on your system first.
 
-1. `go get -d gopkg.in/virgilsecurity/virgil-crypto-go.v6`
-2. `cd $GOPATH/src/gopkg.in/virgilsecurity/virgil-crypto-go.v6`
+1. `go get -d gopkg.in/virgilsecurity/virgil-crypto-go.v5`
+2. `cd $GOPATH/src/gopkg.in/virgilsecurity/virgil-crypto-go.v5`
 3. `make`
 
 ## Usage
-* In your code import gopkg.in/virgilsecurity/virgil-crypto-go.v6
+* In your code import gopkg.in/virgilsecurity/virgil-crypto-go.v5
 ```go
 import (
 	"gopkg.in/virgil.v6"
 
-	crypto "gopkg.in/virgilsecurity/virgil-crypto-go.v6"
+	crypto "gopkg.in/virgilsecurity/virgil-crypto-go.v5"
 
 )
 ```
