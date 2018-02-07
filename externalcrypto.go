@@ -41,8 +41,8 @@ import (
 	"crypto/subtle"
 	"fmt"
 	"github.com/pkg/errors"
-	"gopkg.in/virgil.v6/crypto-api"
-	"gopkg.in/virgil.v6/crypto-native"
+	"gopkg.in/virgil.v5/crypto-api"
+	"gopkg.in/virgil.v5/crypto-native"
 	"io"
 )
 

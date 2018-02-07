@@ -37,8 +37,8 @@
 package virgil_crypto_go
 
 import (
-	"gopkg.in/virgil.v6/crypto-native"
-	"gopkg.in/virgil.v6/crypto-native/keytypes"
+	"gopkg.in/virgil.v5/crypto-native"
+	"gopkg.in/virgil.v5/crypto-native/keytypes"
 )
 
 var KeyTypeMap = map[cryptonative.KeyType]interface{}{

@@ -39,7 +39,7 @@ package virgil_crypto_go
 import (
 	"encoding/base64"
 	"encoding/pem"
-	"gopkg.in/virgil.v6/crypto-native"
+	"gopkg.in/virgil.v5/crypto-native"
 )
 
 type externalKeypair struct {

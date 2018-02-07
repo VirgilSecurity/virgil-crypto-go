@@ -12,7 +12,7 @@ The package is supported only Linux and Mac OS X. Please make sure [all dependen
 * In your code import gopkg.in/virgilsecurity/virgil-crypto-go.v5
 ```go
 import (
-	"gopkg.in/virgil.v6"
+	"gopkg.in/virgil.v5"
 
 	crypto "gopkg.in/virgilsecurity/virgil-crypto-go.v5"
 
