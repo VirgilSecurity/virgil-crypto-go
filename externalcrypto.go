@@ -55,18 +55,6 @@ const (
 	signerId     = "VIRGIL-DATA-SIGNER-ID"
 )
 
-const (
-	HASH_TYPE_SHA256 = iota
-	HASH_TYPE_SHA384
-	HASH_TYPE_SHA512
-)
-
-var hashTypes = map[int]VirgilCryptoFoundationVirgilHashAlgorithm{
-	HASH_TYPE_SHA256: VirgilHashAlgorithm_SHA256,
-	HASH_TYPE_SHA384: VirgilHashAlgorithm_SHA384,
-	HASH_TYPE_SHA512: VirgilHashAlgorithm_SHA512,
-}
-
 func (c *ExternalCrypto) SetKeyType(keyType cryptonative.KeyType) error {
 	if _, ok := KeyTypeMap[keyType]; !ok {
 		return errors.New("key type not supported")
@@ -363,7 +351,7 @@ func (c *ExternalCrypto) Sign(data []byte, signer cryptoapi.PrivateKey) (_ []byt
 		}
 	}()
 
-	s := NewVirgilSigner()
+	s := NewVirgilSigner(VirgilHashAlgorithm_SHA512)
 	defer DeleteVirgilSigner(s)
 	k, ok := signer.(*externalPrivateKey)
 	if !ok {
@@ -381,40 +369,6 @@ func (c *ExternalCrypto) Sign(data []byte, signer cryptoapi.PrivateKey) (_ []byt
 	return signature, nil
 }
 
-func (c *ExternalCrypto) SignHash(hashType int, hash []byte, signer cryptoapi.PrivateKey) (_ []byte, err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			var ok bool
-			err, ok = r.(error)
-			if !ok {
-				err = fmt.Errorf("pkg: %v", r)
-			}
-		}
-	}()
-
-	alg, ok := hashTypes[hashType]
-	if !ok {
-		return nil, errors.New("invalid hash algorithm")
-	}
-
-	s := NewVirgilSignerBase(alg)
-	defer DeleteVirgilSignerBase(s)
-	k, ok := signer.(*externalPrivateKey)
-	if !ok {
-		return nil, errors.New("wrong private key type")
-	}
-
-	vdata := ToVirgilByteArray(hash)
-	defer DeleteVirgilByteArray(vdata)
-	vkey := ToVirgilByteArray(k.key)
-	defer DeleteVirgilByteArray(vkey)
-	vsign := s.SignHash(vdata, vkey)
-	defer DeleteVirgilByteArray(vsign)
-
-	signature := ToSlice(vsign)
-	return signature, nil
-}
-
 func (c *ExternalCrypto) VerifySignature(data []byte, signature []byte, key cryptoapi.PublicKey) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -425,7 +379,7 @@ func (c *ExternalCrypto) VerifySignature(data []byte, signature []byte, key cryp
 			}
 		}
 	}()
-	s := NewVirgilSigner()
+	s := NewVirgilSigner(VirgilHashAlgorithm_SHA512)
 	defer DeleteVirgilSigner(s)
 
 	vdata := ToVirgilByteArray(data)
@@ -444,35 +398,6 @@ func (c *ExternalCrypto) VerifySignature(data []byte, signature []byte, key cryp
 	return nil
 }
 
-func (c *ExternalCrypto) VerifyHash(hashType int, hash []byte, signature []byte, key cryptoapi.PublicKey) (_ bool, err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			var ok bool
-			err, ok = r.(error)
-			if !ok {
-				err = fmt.Errorf("pkg: %v", r)
-			}
-		}
-	}()
-	alg, ok := hashTypes[hashType]
-	if !ok {
-		return false, errors.New("invalid hash algorithm")
-	}
-
-	s := NewVirgilSignerBase(alg)
-	defer DeleteVirgilSignerBase(s)
-
-	vdata := ToVirgilByteArray(hash)
-	defer DeleteVirgilByteArray(vdata)
-	vsignature := ToVirgilByteArray(signature)
-	defer DeleteVirgilByteArray(vsignature)
-	vcontents := ToVirgilByteArray(key.(*externalPublicKey).contents())
-	defer DeleteVirgilByteArray(vcontents)
-
-	valid := s.VerifyHash(vdata, vsignature, vcontents)
-	return valid, nil
-}
-
 func (c *ExternalCrypto) SignStream(in io.Reader, signerKey cryptoapi.PrivateKey) (_ []byte, err error) {
 
 	defer func() {
@@ -485,7 +410,7 @@ func (c *ExternalCrypto) SignStream(in io.Reader, signerKey cryptoapi.PrivateKey
 		}
 	}()
 
-	signer := NewVirgilStreamSigner()
+	signer := NewVirgilStreamSigner(VirgilHashAlgorithm_SHA512)
 	defer DeleteVirgilStreamSigner(signer)
 
 	s := NewDirectorVirgilDataSource(NewDataSource(in))
@@ -512,7 +437,7 @@ func (c *ExternalCrypto) VerifyStream(in io.Reader, signature []byte, key crypto
 		}
 	}()
 
-	signer := NewVirgilStreamSigner()
+	signer := NewVirgilStreamSigner(VirgilHashAlgorithm_SHA512)
 	defer DeleteVirgilStreamSigner(signer)
 
 	s := NewDirectorVirgilDataSource(NewDataSource(in))
