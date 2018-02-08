@@ -3,7 +3,6 @@ package virgil_crypto_go
 import (
 	"bytes"
 	"crypto/rand"
-	"crypto/sha256"
 	"testing"
 )
 
@@ -35,26 +34,24 @@ func TestSignEncrypt(t *testing.T) {
 
 }
 
-func TestSignVerifyHash(t *testing.T) {
+func TestSignSHA512Encrypt(t *testing.T) {
 	crypto := &NativeCrypto{}
 
 	//make random data
 	data := make([]byte, 257)
 	rand.Read(data)
 
-	hash := sha256.Sum256(data)
-
 	signerKeypair, err := crypto.GenerateKeypair()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	signature, err := crypto.SignHash(hash[:], signerKeypair.PrivateKey())
+	sign, err := crypto.SignSHA512(data, signerKeypair.PrivateKey())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if res, err := crypto.VerifyHash(hash[:], signature, signerKeypair.PublicKey()); err != nil || !res {
+	if ok, err := crypto.Verify(data, sign, signerKeypair.PublicKey()); err != nil || !ok {
 		t.Fatal(err)
 	}
 

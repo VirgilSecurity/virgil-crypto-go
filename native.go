@@ -323,7 +323,7 @@ func (c *NativeCrypto) Sign(data []byte, signer virgilcrypto.PrivateKey) (_ []by
 	return signature, nil
 }
 
-func (c *NativeCrypto) SignHash(hash []byte, signer virgilcrypto.PrivateKey) (_ []byte, err error) {
+func (c *NativeCrypto) SignSHA512(data []byte, signer virgilcrypto.PrivateKey) (_ []byte, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -334,18 +334,18 @@ func (c *NativeCrypto) SignHash(hash []byte, signer virgilcrypto.PrivateKey) (_ 
 		}
 	}()
 
-	s := NewVirgilSignerBase(VirgilHashAlgorithm_SHA256)
-	defer DeleteVirgilSignerBase(s)
+	s := NewVirgilSigner(VirgilHashAlgorithm_SHA512)
+	defer DeleteVirgilSigner(s)
 	k, ok := signer.(*nativePrivateKey)
 	if !ok {
 		return nil, errors.New("wrong private key type")
 	}
 
-	vdata := ToVirgilByteArray(hash)
+	vdata := ToVirgilByteArray(data)
 	defer DeleteVirgilByteArray(vdata)
 	vkey := ToVirgilByteArray(k.key)
 	defer DeleteVirgilByteArray(vkey)
-	vsign := s.SignHash(vdata, vkey)
+	vsign := s.Sign(vdata, vkey)
 	defer DeleteVirgilByteArray(vsign)
 
 	signature := ToSlice(vsign)
@@ -373,30 +373,6 @@ func (c *NativeCrypto) Verify(data []byte, signature []byte, key virgilcrypto.Pu
 	defer DeleteVirgilByteArray(vcontents)
 
 	valid := s.Verify(vdata, vsignature, vcontents)
-	return valid, nil
-}
-
-func (c *NativeCrypto) VerifyHash(hash []byte, signature []byte, key virgilcrypto.PublicKey) (_ bool, err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			var ok bool
-			err, ok = r.(error)
-			if !ok {
-				err = fmt.Errorf("pkg: %v", r)
-			}
-		}
-	}()
-	s := NewVirgilSignerBase(VirgilHashAlgorithm_SHA256)
-	defer DeleteVirgilSignerBase(s)
-
-	vdata := ToVirgilByteArray(hash)
-	defer DeleteVirgilByteArray(vdata)
-	vsignature := ToVirgilByteArray(signature)
-	defer DeleteVirgilByteArray(vsignature)
-	vcontents := ToVirgilByteArray(key.(*nativePublicKey).contents())
-	defer DeleteVirgilByteArray(vcontents)
-
-	valid := s.VerifyHash(vdata, vsignature, vcontents)
 	return valid, nil
 }
 
