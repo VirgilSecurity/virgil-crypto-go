@@ -39,7 +39,6 @@ package virgil_crypto_go
 import (
 	"encoding/base64"
 	"encoding/pem"
-	"gopkg.in/virgil.v5/crypto-native"
 )
 
 type externalKeypair struct {
@@ -53,10 +52,10 @@ func (e *externalKeypair) HasPublic() bool {
 func (e *externalKeypair) HasPrivate() bool {
 	return e.privateKey != nil && !e.privateKey.Empty()
 }
-func (e *externalKeypair) PublicKey() cryptonative.PublicKey {
+func (e *externalKeypair) PublicKey() *externalPublicKey {
 	return e.publicKey
 }
-func (e *externalKeypair) PrivateKey() cryptonative.PrivateKey {
+func (e *externalKeypair) PrivateKey() *externalPrivateKey {
 	return e.privateKey
 }
 

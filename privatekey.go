@@ -36,8 +36,6 @@
 
 package virgil_crypto_go
 
-import "gopkg.in/virgil.v5/crypto-native"
-
 type externalPrivateKey struct {
 	receiverID []byte
 	key        []byte
@@ -73,7 +71,7 @@ func (k *externalPrivateKey) Empty() bool {
 	return k == nil || len(k.key) == 0
 }
 
-func (k *externalPrivateKey) ExtractPublicKey() (cryptonative.PublicKey, error) {
+func (k *externalPrivateKey) ExtractPublicKey() (*externalPublicKey, error) {
 	vkey := ToVirgilByteArray(k.key)
 	defer DeleteVirgilByteArray(vkey)
 	vempty := ToVirgilByteArray(make([]byte, 0))
@@ -88,4 +86,8 @@ func (k *externalPrivateKey) ExtractPublicKey() (cryptonative.PublicKey, error) 
 		key:        derPub,
 		receiverID: k.receiverID,
 	}, nil
+}
+
+func (k *externalPrivateKey) IsPrivate() bool {
+	return true
 }

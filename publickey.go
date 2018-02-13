@@ -64,3 +64,7 @@ func (k *externalPublicKey) Encode() ([]byte, error) {
 func (k *externalPublicKey) Empty() bool {
 	return k == nil || len(k.key) == 0
 }
+
+func (k *externalPublicKey) IsPublic() bool {
+	return true
+}

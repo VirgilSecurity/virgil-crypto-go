@@ -41,13 +41,15 @@ import (
 	"crypto/subtle"
 	"fmt"
 	"github.com/pkg/errors"
-	"gopkg.in/virgil.v5/crypto-api"
-	"gopkg.in/virgil.v5/crypto-native"
 	"io"
 )
 
 type ExternalCrypto struct {
-	keyType cryptonative.KeyType
+	keyType KeyType
+}
+
+func NewCrypto() *ExternalCrypto {
+	return &ExternalCrypto{}
 }
 
 const (
@@ -55,7 +57,7 @@ const (
 	signerId     = "VIRGIL-DATA-SIGNER-ID"
 )
 
-func (c *ExternalCrypto) SetKeyType(keyType cryptonative.KeyType) error {
+func (c *ExternalCrypto) SetKeyType(keyType KeyType) error {
 	if _, ok := KeyTypeMap[keyType]; !ok {
 		return errors.New("key type not supported")
 	} else {
@@ -64,7 +66,7 @@ func (c *ExternalCrypto) SetKeyType(keyType cryptonative.KeyType) error {
 	}
 }
 
-func (c *ExternalCrypto) GenerateKeypair() (_ cryptonative.Keypair, err error) {
+func (c *ExternalCrypto) GenerateKeypair() (_ *externalKeypair, err error) {
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -110,7 +112,7 @@ func (c *ExternalCrypto) GenerateKeypair() (_ cryptonative.Keypair, err error) {
 	}, nil
 }
 
-func (c *ExternalCrypto) ImportPrivateKey(data []byte, password string) (_ cryptoapi.PrivateKey, err error) {
+func (c *ExternalCrypto) ImportPrivateKey(data []byte, password string) (_ *externalPrivateKey, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -156,7 +158,7 @@ func (c *ExternalCrypto) ImportPrivateKey(data []byte, password string) (_ crypt
 	}, nil
 }
 
-func (c *ExternalCrypto) ImportPublicKey(data []byte) (_ cryptoapi.PublicKey, err error) {
+func (c *ExternalCrypto) ImportPublicKey(data []byte) (_ *externalPublicKey, err error) {
 	rawPub := unwrapKey(data)
 	receiverId := c.CalculateFingerprint(rawPub)
 
@@ -167,7 +169,7 @@ func (c *ExternalCrypto) ImportPublicKey(data []byte) (_ cryptoapi.PublicKey, er
 
 }
 
-func (c *ExternalCrypto) ExportPrivateKey(key cryptoapi.PrivateKey, password string) (_ []byte, err error) {
+func (c *ExternalCrypto) ExportPrivateKey(key *externalPrivateKey, password string) (_ []byte, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -178,14 +180,10 @@ func (c *ExternalCrypto) ExportPrivateKey(key cryptoapi.PrivateKey, password str
 		}
 	}()
 
-	k, ok := key.(*externalPrivateKey)
-	if !ok {
-		return nil, errors.New("wrong private key type")
-	}
-	return k.Encode([]byte(password))
+	return key.Encode([]byte(password))
 }
 
-func (c *ExternalCrypto) ExportPublicKey(key cryptoapi.PublicKey) (_ []byte, err error) {
+func (c *ExternalCrypto) ExportPublicKey(key *externalPublicKey) (_ []byte, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -195,14 +193,10 @@ func (c *ExternalCrypto) ExportPublicKey(key cryptoapi.PublicKey) (_ []byte, err
 			}
 		}
 	}()
-	k, ok := key.(*externalPublicKey)
-	if !ok {
-		return nil, errors.New("wrong private key type")
-	}
-	return k.Encode()
+	return key.Encode()
 }
 
-func (c *ExternalCrypto) Encrypt(data []byte, recipients ...cryptoapi.PublicKey) (_ []byte, err error) {
+func (c *ExternalCrypto) Encrypt(data []byte, recipients ...*externalPublicKey) (_ []byte, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -217,11 +211,9 @@ func (c *ExternalCrypto) Encrypt(data []byte, recipients ...cryptoapi.PublicKey)
 	defer DeleteVirgilCipher(ci)
 
 	for _, r := range recipients {
-		rec := r.(*externalPublicKey)
-
-		vrec := ToVirgilByteArray(rec.ReceiverID())
+		vrec := ToVirgilByteArray(r.ReceiverID())
 		defer DeleteVirgilByteArray(vrec)
-		vcon := ToVirgilByteArray(rec.contents())
+		vcon := ToVirgilByteArray(r.contents())
 		defer DeleteVirgilByteArray(vcon)
 		ci.AddKeyRecipient(vrec, vcon)
 	}
@@ -236,7 +228,7 @@ func (c *ExternalCrypto) Encrypt(data []byte, recipients ...cryptoapi.PublicKey)
 	return ct, nil
 }
 
-func (c *ExternalCrypto) EncryptStream(in io.Reader, out io.Writer, recipients ...cryptoapi.PublicKey) (err error) {
+func (c *ExternalCrypto) EncryptStream(in io.Reader, out io.Writer, recipients ...*externalPublicKey) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -257,11 +249,10 @@ func (c *ExternalCrypto) EncryptStream(in io.Reader, out io.Writer, recipients .
 	defer DeleteVirgilStreamCipher(ci)
 
 	for _, r := range recipients {
-		rec := r.(*externalPublicKey)
-		vrec := ToVirgilByteArray(rec.ReceiverID())
+		vrec := ToVirgilByteArray(r.ReceiverID())
 		defer DeleteVirgilByteArray(vrec)
 
-		vcon := ToVirgilByteArray(rec.contents())
+		vcon := ToVirgilByteArray(r.contents())
 		defer DeleteVirgilByteArray(vcon)
 		ci.AddKeyRecipient(vrec, vcon)
 
@@ -273,7 +264,7 @@ func (c *ExternalCrypto) EncryptStream(in io.Reader, out io.Writer, recipients .
 
 }
 
-func (c *ExternalCrypto) Decrypt(data []byte, key cryptoapi.PrivateKey) (_ []byte, err error) {
+func (c *ExternalCrypto) Decrypt(data []byte, key *externalPrivateKey) (_ []byte, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -287,16 +278,11 @@ func (c *ExternalCrypto) Decrypt(data []byte, key cryptoapi.PrivateKey) (_ []byt
 	ci := NewVirgilCipher()
 	defer DeleteVirgilCipher(ci)
 
-	k, ok := key.(*externalPrivateKey)
-	if !ok {
-		return
-	}
-
 	vdata := ToVirgilByteArray(data)
 	defer DeleteVirgilByteArray(vdata)
-	vrec := ToVirgilByteArray(k.ReceiverID())
+	vrec := ToVirgilByteArray(key.ReceiverID())
 	defer DeleteVirgilByteArray(vrec)
-	vcontents := ToVirgilByteArray(k.contents())
+	vcontents := ToVirgilByteArray(key.contents())
 	defer DeleteVirgilByteArray(vcontents)
 
 	vplain := ci.DecryptWithKey(vdata, vrec, vcontents)
@@ -305,7 +291,7 @@ func (c *ExternalCrypto) Decrypt(data []byte, key cryptoapi.PrivateKey) (_ []byt
 	return plainText, nil
 }
 
-func (c *ExternalCrypto) DecryptStream(in io.Reader, out io.Writer, key cryptoapi.PrivateKey) (err error) {
+func (c *ExternalCrypto) DecryptStream(in io.Reader, out io.Writer, key *externalPrivateKey) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -324,15 +310,10 @@ func (c *ExternalCrypto) DecryptStream(in io.Reader, out io.Writer, key cryptoap
 	ci := NewVirgilStreamCipher()
 	defer DeleteVirgilStreamCipher(ci)
 
-	k, ok := key.(*externalPrivateKey)
-	if !ok {
-		return errors.New(" key is not native key")
-	}
-
-	vcontents := ToVirgilByteArray(k.contents())
+	vcontents := ToVirgilByteArray(key.contents())
 	defer DeleteVirgilByteArray(vcontents)
 
-	vrec := ToVirgilByteArray(k.receiverID)
+	vrec := ToVirgilByteArray(key.receiverID)
 	defer DeleteVirgilByteArray(vrec)
 
 	ci.DecryptWithKey(s, d, vrec, vcontents)
@@ -340,7 +321,7 @@ func (c *ExternalCrypto) DecryptStream(in io.Reader, out io.Writer, key cryptoap
 	return
 }
 
-func (c *ExternalCrypto) Sign(data []byte, signer cryptoapi.PrivateKey) (_ []byte, err error) {
+func (c *ExternalCrypto) Sign(data []byte, signer *externalPrivateKey) (_ []byte, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -353,14 +334,9 @@ func (c *ExternalCrypto) Sign(data []byte, signer cryptoapi.PrivateKey) (_ []byt
 
 	s := NewVirgilSigner(VirgilHashAlgorithm_SHA512)
 	defer DeleteVirgilSigner(s)
-	k, ok := signer.(*externalPrivateKey)
-	if !ok {
-		return nil, errors.New("wrong private key type")
-	}
-
 	vdata := ToVirgilByteArray(data)
 	defer DeleteVirgilByteArray(vdata)
-	vkey := ToVirgilByteArray(k.key)
+	vkey := ToVirgilByteArray(signer.key)
 	defer DeleteVirgilByteArray(vkey)
 	vsign := s.Sign(vdata, vkey)
 	defer DeleteVirgilByteArray(vsign)
@@ -369,7 +345,7 @@ func (c *ExternalCrypto) Sign(data []byte, signer cryptoapi.PrivateKey) (_ []byt
 	return signature, nil
 }
 
-func (c *ExternalCrypto) VerifySignature(data []byte, signature []byte, key cryptoapi.PublicKey) (err error) {
+func (c *ExternalCrypto) VerifySignature(data []byte, signature []byte, key *externalPublicKey) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -386,19 +362,19 @@ func (c *ExternalCrypto) VerifySignature(data []byte, signature []byte, key cryp
 	defer DeleteVirgilByteArray(vdata)
 	vsignature := ToVirgilByteArray(signature)
 	defer DeleteVirgilByteArray(vsignature)
-	vcontents := ToVirgilByteArray(key.(*externalPublicKey).contents())
+	vcontents := ToVirgilByteArray(key.contents())
 	defer DeleteVirgilByteArray(vcontents)
 
 	valid := s.Verify(vdata, vsignature, vcontents)
 
 	if !valid {
-		return cryptonative.CryptoError("invalid signature")
+		return errors.New("invalid signature")
 	}
 
 	return nil
 }
 
-func (c *ExternalCrypto) SignStream(in io.Reader, signerKey cryptoapi.PrivateKey) (_ []byte, err error) {
+func (c *ExternalCrypto) SignStream(in io.Reader, signerKey *externalPrivateKey) (_ []byte, err error) {
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -416,7 +392,7 @@ func (c *ExternalCrypto) SignStream(in io.Reader, signerKey cryptoapi.PrivateKey
 	s := NewDirectorVirgilDataSource(NewDataSource(in))
 	defer DeleteDirectorVirgilDataSource(s)
 
-	vcontents := ToVirgilByteArray(signerKey.(*externalPrivateKey).contents())
+	vcontents := ToVirgilByteArray(signerKey.contents())
 	defer DeleteVirgilByteArray(vcontents)
 
 	vsign := signer.Sign(s, vcontents)
@@ -425,7 +401,7 @@ func (c *ExternalCrypto) SignStream(in io.Reader, signerKey cryptoapi.PrivateKey
 	return ToSlice(vsign), nil
 }
 
-func (c *ExternalCrypto) VerifyStream(in io.Reader, signature []byte, key cryptoapi.PublicKey) (res bool, err error) {
+func (c *ExternalCrypto) VerifyStream(in io.Reader, signature []byte, key *externalPublicKey) (res bool, err error) {
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -446,7 +422,7 @@ func (c *ExternalCrypto) VerifyStream(in io.Reader, signature []byte, key crypto
 	vsign := ToVirgilByteArray(signature)
 	defer DeleteVirgilByteArray(vsign)
 
-	vcontents := ToVirgilByteArray(key.(*externalPublicKey).contents())
+	vcontents := ToVirgilByteArray(key.contents())
 	defer DeleteVirgilByteArray(vcontents)
 
 	res = signer.Verify(s, vsign, vcontents)
@@ -458,7 +434,7 @@ func (c *ExternalCrypto) CalculateFingerprint(data []byte) []byte {
 	return hash[:]
 }
 
-func (c *ExternalCrypto) SignThenEncrypt(data []byte, signerKey cryptoapi.PrivateKey, recipients ...cryptoapi.PublicKey) (_ []byte, err error) {
+func (c *ExternalCrypto) SignThenEncrypt(data []byte, signerKey *externalPrivateKey, recipients ...*externalPublicKey) (_ []byte, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -472,12 +448,7 @@ func (c *ExternalCrypto) SignThenEncrypt(data []byte, signerKey cryptoapi.Privat
 	defer DeleteVirgilCipher(ci)
 	params := ci.CustomParams().(VirgilCustomParams)
 
-	k, ok := signerKey.(*externalPrivateKey)
-	if !ok {
-		return nil, errors.New("wrong private key type")
-	}
-
-	signature, err := c.Sign(data, k)
+	signature, err := c.Sign(data, signerKey)
 	if err != nil {
 		return nil, err
 	}
@@ -490,20 +461,15 @@ func (c *ExternalCrypto) SignThenEncrypt(data []byte, signerKey cryptoapi.Privat
 
 	vsignerKey := ToVirgilByteArray([]byte(signerId))
 	defer DeleteVirgilByteArray(vsignerKey)
-	vsigner := ToVirgilByteArray(k.ReceiverID())
+	vsigner := ToVirgilByteArray(signerKey.ReceiverID())
 	defer DeleteVirgilByteArray(vsigner)
 	params.SetString(vsignerKey, vsigner)
 
 	for _, r := range recipients {
 
-		rKey, ok := r.(*externalPublicKey)
-		if !ok {
-			return nil, errors.New("wrong public key type")
-		}
-
-		vrec := ToVirgilByteArray(rKey.ReceiverID())
+		vrec := ToVirgilByteArray(r.ReceiverID())
 		defer DeleteVirgilByteArray(vrec)
-		vconts := ToVirgilByteArray(r.(*externalPublicKey).contents())
+		vconts := ToVirgilByteArray(r.contents())
 		defer DeleteVirgilByteArray(vconts)
 		ci.AddKeyRecipient(vrec, vconts)
 	}
@@ -517,7 +483,7 @@ func (c *ExternalCrypto) SignThenEncrypt(data []byte, signerKey cryptoapi.Privat
 	return ct, nil
 }
 
-func (c *ExternalCrypto) DecryptThenVerify(data []byte, decryptionKey cryptoapi.PrivateKey, verifierKeys ...cryptoapi.PublicKey) (_ []byte, err error) {
+func (c *ExternalCrypto) DecryptThenVerify(data []byte, decryptionKey *externalPrivateKey, verifierKeys ...*externalPublicKey) (_ []byte, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -531,16 +497,11 @@ func (c *ExternalCrypto) DecryptThenVerify(data []byte, decryptionKey cryptoapi.
 	ci := NewVirgilCipher()
 	defer DeleteVirgilCipher(ci)
 
-	k, ok := decryptionKey.(*externalPrivateKey)
-	if !ok {
-		return nil, errors.New("wrong private key type")
-	}
-
 	vdata := ToVirgilByteArray(data)
 	defer DeleteVirgilByteArray(vdata)
-	vrec := ToVirgilByteArray(k.ReceiverID())
+	vrec := ToVirgilByteArray(decryptionKey.ReceiverID())
 	defer DeleteVirgilByteArray(vrec)
-	vkey := ToVirgilByteArray(k.key)
+	vkey := ToVirgilByteArray(decryptionKey.key)
 	defer DeleteVirgilByteArray(vkey)
 	vpt := ci.DecryptWithKey(vdata, vrec, vkey)
 	defer DeleteVirgilByteArray(vpt)
@@ -569,12 +530,8 @@ func (c *ExternalCrypto) DecryptThenVerify(data []byte, decryptionKey cryptoapi.
 		signerIdValue := ToSlice(signerIdString)
 
 		for _, v := range verifierKeys {
-			vk, ok := v.(*externalPublicKey)
-			if !ok {
-				return nil, errors.New("wrong public key type")
-			}
 
-			if subtle.ConstantTimeCompare(vk.ReceiverID(), signerIdValue) == 1 {
+			if subtle.ConstantTimeCompare(v.ReceiverID(), signerIdValue) == 1 {
 				err := c.VerifySignature(plaintext, sig, v)
 				if err != nil {
 					return nil, err
@@ -582,14 +539,14 @@ func (c *ExternalCrypto) DecryptThenVerify(data []byte, decryptionKey cryptoapi.
 				return plaintext, nil
 			}
 		}
-		return nil, cryptonative.CryptoError("Could not verify signature with provided keys")
+		return nil, errors.New("Could not verify signature with provided keys")
 
 	}
 
 	return plaintext, nil
 }
 
-func (c *ExternalCrypto) ExtractPublicKey(key cryptoapi.PrivateKey) (_ cryptoapi.PublicKey, err error) {
+func (c *ExternalCrypto) ExtractPublicKey(key *externalPrivateKey) (_ *externalPublicKey, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -600,11 +557,7 @@ func (c *ExternalCrypto) ExtractPublicKey(key cryptoapi.PrivateKey) (_ cryptoapi
 		}
 	}()
 
-	k, ok := key.(*externalPrivateKey)
-	if !ok {
-		return nil, errors.New("the key is not native private key")
-	}
-	return k.ExtractPublicKey()
+	return key.ExtractPublicKey()
 
 }
 
