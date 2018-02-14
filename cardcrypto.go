@@ -12,24 +12,28 @@ func NewCardCrypto() *CardCrypto {
 
 func (c *CardCrypto) GenerateSignature(data []byte, key interface {
 	IsPrivate() bool
+	Identifier() []byte
 }) ([]byte, error) {
 	return c.Crypto.Sign(data, key.(*externalPrivateKey))
 }
 
 func (c *CardCrypto) VerifySignature(data []byte, signature []byte, key interface {
 	IsPublic() bool
+	Identifier() []byte
 }) error {
 	return c.Crypto.VerifySignature(data, signature, key.(*externalPublicKey))
 }
 
 func (c *CardCrypto) ExportPublicKey(key interface {
 	IsPublic() bool
+	Identifier() []byte
 }) ([]byte, error) {
 	return c.Crypto.ExportPublicKey(key.(*externalPublicKey))
 }
 
 func (c *CardCrypto) ImportPublicKey(data []byte) (interface {
 	IsPublic() bool
+	Identifier() []byte
 }, error) {
 	return c.Crypto.ImportPublicKey(data)
 }

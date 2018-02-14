@@ -45,7 +45,7 @@ func (k *externalPrivateKey) contents() []byte {
 	return k.key
 }
 
-func (k *externalPrivateKey) ReceiverID() []byte {
+func (k *externalPrivateKey) Identifier() []byte {
 	return k.receiverID
 }
 

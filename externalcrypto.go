@@ -38,14 +38,17 @@ package virgil_crypto_go
 
 import (
 	"crypto/sha256"
+	"crypto/sha512"
 	"crypto/subtle"
 	"fmt"
-	"github.com/pkg/errors"
 	"io"
+
+	"github.com/pkg/errors"
 )
 
 type ExternalCrypto struct {
-	keyType KeyType
+	keyType               KeyType
+	UseSha256Fingerprints bool
 }
 
 func NewCrypto() *ExternalCrypto {
@@ -211,7 +214,7 @@ func (c *ExternalCrypto) Encrypt(data []byte, recipients ...*externalPublicKey) 
 	defer DeleteVirgilCipher(ci)
 
 	for _, r := range recipients {
-		vrec := ToVirgilByteArray(r.ReceiverID())
+		vrec := ToVirgilByteArray(r.Identifier())
 		defer DeleteVirgilByteArray(vrec)
 		vcon := ToVirgilByteArray(r.contents())
 		defer DeleteVirgilByteArray(vcon)
@@ -249,7 +252,7 @@ func (c *ExternalCrypto) EncryptStream(in io.Reader, out io.Writer, recipients .
 	defer DeleteVirgilStreamCipher(ci)
 
 	for _, r := range recipients {
-		vrec := ToVirgilByteArray(r.ReceiverID())
+		vrec := ToVirgilByteArray(r.Identifier())
 		defer DeleteVirgilByteArray(vrec)
 
 		vcon := ToVirgilByteArray(r.contents())
@@ -280,7 +283,7 @@ func (c *ExternalCrypto) Decrypt(data []byte, key *externalPrivateKey) (_ []byte
 
 	vdata := ToVirgilByteArray(data)
 	defer DeleteVirgilByteArray(vdata)
-	vrec := ToVirgilByteArray(key.ReceiverID())
+	vrec := ToVirgilByteArray(key.Identifier())
 	defer DeleteVirgilByteArray(vrec)
 	vcontents := ToVirgilByteArray(key.contents())
 	defer DeleteVirgilByteArray(vcontents)
@@ -430,8 +433,13 @@ func (c *ExternalCrypto) VerifyStream(in io.Reader, signature []byte, key *exter
 	return res, nil
 }
 func (c *ExternalCrypto) CalculateFingerprint(data []byte) []byte {
-	hash := sha256.Sum256(data)
-	return hash[:]
+	if c.UseSha256Fingerprints {
+		hash := sha256.Sum256(data)
+		return hash[:]
+	} else {
+		hash := sha512.Sum512(data)
+		return hash[:8]
+	}
 }
 
 func (c *ExternalCrypto) SignThenEncrypt(data []byte, signerKey *externalPrivateKey, recipients ...*externalPublicKey) (_ []byte, err error) {
@@ -457,17 +465,17 @@ func (c *ExternalCrypto) SignThenEncrypt(data []byte, signerKey *externalPrivate
 
 	vsig := ToVirgilByteArray(signature)
 	defer DeleteVirgilByteArray(vsig)
-	params.SetString(vsigKey, vsig)
+	params.SetData(vsigKey, vsig)
 
 	vsignerKey := ToVirgilByteArray([]byte(signerId))
 	defer DeleteVirgilByteArray(vsignerKey)
-	vsigner := ToVirgilByteArray(signerKey.ReceiverID())
+	vsigner := ToVirgilByteArray(signerKey.Identifier())
 	defer DeleteVirgilByteArray(vsigner)
-	params.SetString(vsignerKey, vsigner)
+	params.SetData(vsignerKey, vsigner)
 
 	for _, r := range recipients {
 
-		vrec := ToVirgilByteArray(r.ReceiverID())
+		vrec := ToVirgilByteArray(r.Identifier())
 		defer DeleteVirgilByteArray(vrec)
 		vconts := ToVirgilByteArray(r.contents())
 		defer DeleteVirgilByteArray(vconts)
@@ -499,7 +507,7 @@ func (c *ExternalCrypto) DecryptThenVerify(data []byte, decryptionKey *externalP
 
 	vdata := ToVirgilByteArray(data)
 	defer DeleteVirgilByteArray(vdata)
-	vrec := ToVirgilByteArray(decryptionKey.ReceiverID())
+	vrec := ToVirgilByteArray(decryptionKey.Identifier())
 	defer DeleteVirgilByteArray(vrec)
 	vkey := ToVirgilByteArray(decryptionKey.key)
 	defer DeleteVirgilByteArray(vkey)
@@ -510,7 +518,7 @@ func (c *ExternalCrypto) DecryptThenVerify(data []byte, decryptionKey *externalP
 
 	vsigKey := ToVirgilByteArray([]byte(signatureKey))
 	defer DeleteVirgilByteArray(vsigKey)
-	sigString := ci.CustomParams().(VirgilCustomParams).GetString(vsigKey)
+	sigString := ci.CustomParams().(VirgilCustomParams).GetData(vsigKey)
 	defer DeleteVirgilByteArray(sigString)
 
 	sig := ToSlice(sigString)
@@ -524,14 +532,14 @@ func (c *ExternalCrypto) DecryptThenVerify(data []byte, decryptionKey *externalP
 	} else {
 		vsignerIdKey := ToVirgilByteArray([]byte(signerId))
 		defer DeleteVirgilByteArray(vsignerIdKey)
-		signerIdString := ci.CustomParams().(VirgilCustomParams).GetString(vsignerIdKey)
+		signerIdString := ci.CustomParams().(VirgilCustomParams).GetData(vsignerIdKey)
 		defer DeleteVirgilByteArray(signerIdString)
 
 		signerIdValue := ToSlice(signerIdString)
 
 		for _, v := range verifierKeys {
 
-			if subtle.ConstantTimeCompare(v.ReceiverID(), signerIdValue) == 1 {
+			if subtle.ConstantTimeCompare(v.Identifier(), signerIdValue) == 1 {
 				err := c.VerifySignature(plaintext, sig, v)
 				if err != nil {
 					return nil, err
