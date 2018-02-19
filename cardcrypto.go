@@ -14,21 +14,21 @@ func (c *CardCrypto) GenerateSignature(data []byte, key interface {
 	IsPrivate() bool
 	Identifier() []byte
 }) ([]byte, error) {
-	return c.Crypto.Sign(data, key.(*externalPrivateKey))
+	return c.Crypto.Sign(data, key)
 }
 
 func (c *CardCrypto) VerifySignature(data []byte, signature []byte, key interface {
 	IsPublic() bool
 	Identifier() []byte
 }) error {
-	return c.Crypto.VerifySignature(data, signature, key.(*externalPublicKey))
+	return c.Crypto.VerifySignature(data, signature, key)
 }
 
 func (c *CardCrypto) ExportPublicKey(key interface {
 	IsPublic() bool
 	Identifier() []byte
 }) ([]byte, error) {
-	return c.Crypto.ExportPublicKey(key.(*externalPublicKey))
+	return c.Crypto.ExportPublicKey(key)
 }
 
 func (c *CardCrypto) ImportPublicKey(data []byte) (interface {

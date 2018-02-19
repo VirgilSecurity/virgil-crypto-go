@@ -12,14 +12,14 @@ func (t *VirgilAccessTokenSigner) GenerateTokenSignature(data []byte, privateKey
 	IsPrivate() bool
 	Identifier() []byte
 }) ([]byte, error) {
-	return t.Crypto.Sign(data, privateKey.(*externalPrivateKey))
+	return t.Crypto.Sign(data, privateKey)
 
 }
 func (t *VirgilAccessTokenSigner) VerifyTokenSignature(data []byte, signature []byte, publicKey interface {
 	IsPublic() bool
 	Identifier() []byte
 }) error {
-	return t.Crypto.VerifySignature(data, signature, publicKey.(*externalPublicKey))
+	return t.Crypto.VerifySignature(data, signature, publicKey)
 
 }
 func (t *VirgilAccessTokenSigner) GetAlgorithm() string {

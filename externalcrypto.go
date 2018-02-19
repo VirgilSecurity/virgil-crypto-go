@@ -115,7 +115,10 @@ func (c *ExternalCrypto) GenerateKeypair() (_ *externalKeypair, err error) {
 	}, nil
 }
 
-func (c *ExternalCrypto) ImportPrivateKey(data []byte, password string) (_ *externalPrivateKey, err error) {
+func (c *ExternalCrypto) ImportPrivateKey(data []byte, password string) (_ interface {
+	IsPrivate() bool
+	Identifier() []byte
+}, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -161,7 +164,10 @@ func (c *ExternalCrypto) ImportPrivateKey(data []byte, password string) (_ *exte
 	}, nil
 }
 
-func (c *ExternalCrypto) ImportPublicKey(data []byte) (_ *externalPublicKey, err error) {
+func (c *ExternalCrypto) ImportPublicKey(data []byte) (_ interface {
+	IsPublic() bool
+	Identifier() []byte
+}, err error) {
 	rawPub := unwrapKey(data)
 	receiverId := c.CalculateFingerprint(rawPub)
 
@@ -172,7 +178,10 @@ func (c *ExternalCrypto) ImportPublicKey(data []byte) (_ *externalPublicKey, err
 
 }
 
-func (c *ExternalCrypto) ExportPrivateKey(key *externalPrivateKey, password string) (_ []byte, err error) {
+func (c *ExternalCrypto) ExportPrivateKey(key interface {
+	IsPrivate() bool
+	Identifier() []byte
+}, password string) (_ []byte, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -183,10 +192,13 @@ func (c *ExternalCrypto) ExportPrivateKey(key *externalPrivateKey, password stri
 		}
 	}()
 
-	return key.Encode([]byte(password))
+	return key.(*externalPrivateKey).Encode([]byte(password))
 }
 
-func (c *ExternalCrypto) ExportPublicKey(key *externalPublicKey) (_ []byte, err error) {
+func (c *ExternalCrypto) ExportPublicKey(key interface {
+	IsPublic() bool
+	Identifier() []byte
+}) (_ []byte, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -196,10 +208,13 @@ func (c *ExternalCrypto) ExportPublicKey(key *externalPublicKey) (_ []byte, err 
 			}
 		}
 	}()
-	return key.Encode()
+	return key.(*externalPublicKey).Encode()
 }
 
-func (c *ExternalCrypto) Encrypt(data []byte, recipients ...*externalPublicKey) (_ []byte, err error) {
+func (c *ExternalCrypto) Encrypt(data []byte, recipients ...interface {
+	IsPublic() bool
+	Identifier() []byte
+}) (_ []byte, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -216,7 +231,7 @@ func (c *ExternalCrypto) Encrypt(data []byte, recipients ...*externalPublicKey) 
 	for _, r := range recipients {
 		vrec := ToVirgilByteArray(r.Identifier())
 		defer DeleteVirgilByteArray(vrec)
-		vcon := ToVirgilByteArray(r.contents())
+		vcon := ToVirgilByteArray(r.(*externalPublicKey).contents())
 		defer DeleteVirgilByteArray(vcon)
 		ci.AddKeyRecipient(vrec, vcon)
 	}
@@ -231,7 +246,10 @@ func (c *ExternalCrypto) Encrypt(data []byte, recipients ...*externalPublicKey) 
 	return ct, nil
 }
 
-func (c *ExternalCrypto) EncryptStream(in io.Reader, out io.Writer, recipients ...*externalPublicKey) (err error) {
+func (c *ExternalCrypto) EncryptStream(in io.Reader, out io.Writer, recipients ...interface {
+	IsPublic() bool
+	Identifier() []byte
+}) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -255,7 +273,7 @@ func (c *ExternalCrypto) EncryptStream(in io.Reader, out io.Writer, recipients .
 		vrec := ToVirgilByteArray(r.Identifier())
 		defer DeleteVirgilByteArray(vrec)
 
-		vcon := ToVirgilByteArray(r.contents())
+		vcon := ToVirgilByteArray(r.(*externalPublicKey).contents())
 		defer DeleteVirgilByteArray(vcon)
 		ci.AddKeyRecipient(vrec, vcon)
 
@@ -267,7 +285,10 @@ func (c *ExternalCrypto) EncryptStream(in io.Reader, out io.Writer, recipients .
 
 }
 
-func (c *ExternalCrypto) Decrypt(data []byte, key *externalPrivateKey) (_ []byte, err error) {
+func (c *ExternalCrypto) Decrypt(data []byte, key interface {
+	IsPrivate() bool
+	Identifier() []byte
+}) (_ []byte, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -285,7 +306,7 @@ func (c *ExternalCrypto) Decrypt(data []byte, key *externalPrivateKey) (_ []byte
 	defer DeleteVirgilByteArray(vdata)
 	vrec := ToVirgilByteArray(key.Identifier())
 	defer DeleteVirgilByteArray(vrec)
-	vcontents := ToVirgilByteArray(key.contents())
+	vcontents := ToVirgilByteArray(key.(*externalPrivateKey).contents())
 	defer DeleteVirgilByteArray(vcontents)
 
 	vplain := ci.DecryptWithKey(vdata, vrec, vcontents)
@@ -294,7 +315,10 @@ func (c *ExternalCrypto) Decrypt(data []byte, key *externalPrivateKey) (_ []byte
 	return plainText, nil
 }
 
-func (c *ExternalCrypto) DecryptStream(in io.Reader, out io.Writer, key *externalPrivateKey) (err error) {
+func (c *ExternalCrypto) DecryptStream(in io.Reader, out io.Writer, key interface {
+	IsPrivate() bool
+	Identifier() []byte
+}) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -313,10 +337,10 @@ func (c *ExternalCrypto) DecryptStream(in io.Reader, out io.Writer, key *externa
 	ci := NewVirgilStreamCipher()
 	defer DeleteVirgilStreamCipher(ci)
 
-	vcontents := ToVirgilByteArray(key.contents())
+	vcontents := ToVirgilByteArray(key.(*externalPrivateKey).contents())
 	defer DeleteVirgilByteArray(vcontents)
 
-	vrec := ToVirgilByteArray(key.receiverID)
+	vrec := ToVirgilByteArray(key.(*externalPrivateKey).receiverID)
 	defer DeleteVirgilByteArray(vrec)
 
 	ci.DecryptWithKey(s, d, vrec, vcontents)
@@ -324,7 +348,10 @@ func (c *ExternalCrypto) DecryptStream(in io.Reader, out io.Writer, key *externa
 	return
 }
 
-func (c *ExternalCrypto) Sign(data []byte, signer *externalPrivateKey) (_ []byte, err error) {
+func (c *ExternalCrypto) Sign(data []byte, signer interface {
+	IsPrivate() bool
+	Identifier() []byte
+}) (_ []byte, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -339,7 +366,7 @@ func (c *ExternalCrypto) Sign(data []byte, signer *externalPrivateKey) (_ []byte
 	defer DeleteVirgilSigner(s)
 	vdata := ToVirgilByteArray(data)
 	defer DeleteVirgilByteArray(vdata)
-	vkey := ToVirgilByteArray(signer.key)
+	vkey := ToVirgilByteArray(signer.(*externalPrivateKey).contents())
 	defer DeleteVirgilByteArray(vkey)
 	vsign := s.Sign(vdata, vkey)
 	defer DeleteVirgilByteArray(vsign)
@@ -348,7 +375,10 @@ func (c *ExternalCrypto) Sign(data []byte, signer *externalPrivateKey) (_ []byte
 	return signature, nil
 }
 
-func (c *ExternalCrypto) VerifySignature(data []byte, signature []byte, key *externalPublicKey) (err error) {
+func (c *ExternalCrypto) VerifySignature(data []byte, signature []byte, key interface {
+	IsPublic() bool
+	Identifier() []byte
+}) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -365,7 +395,7 @@ func (c *ExternalCrypto) VerifySignature(data []byte, signature []byte, key *ext
 	defer DeleteVirgilByteArray(vdata)
 	vsignature := ToVirgilByteArray(signature)
 	defer DeleteVirgilByteArray(vsignature)
-	vcontents := ToVirgilByteArray(key.contents())
+	vcontents := ToVirgilByteArray(key.(*externalPublicKey).contents())
 	defer DeleteVirgilByteArray(vcontents)
 
 	valid := s.Verify(vdata, vsignature, vcontents)
@@ -377,7 +407,10 @@ func (c *ExternalCrypto) VerifySignature(data []byte, signature []byte, key *ext
 	return nil
 }
 
-func (c *ExternalCrypto) SignStream(in io.Reader, signerKey *externalPrivateKey) (_ []byte, err error) {
+func (c *ExternalCrypto) SignStream(in io.Reader, signerKey interface {
+	IsPrivate() bool
+	Identifier() []byte
+}) (_ []byte, err error) {
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -395,7 +428,7 @@ func (c *ExternalCrypto) SignStream(in io.Reader, signerKey *externalPrivateKey)
 	s := NewDirectorVirgilDataSource(NewDataSource(in))
 	defer DeleteDirectorVirgilDataSource(s)
 
-	vcontents := ToVirgilByteArray(signerKey.contents())
+	vcontents := ToVirgilByteArray(signerKey.(*externalPrivateKey).contents())
 	defer DeleteVirgilByteArray(vcontents)
 
 	vsign := signer.Sign(s, vcontents)
@@ -404,7 +437,10 @@ func (c *ExternalCrypto) SignStream(in io.Reader, signerKey *externalPrivateKey)
 	return ToSlice(vsign), nil
 }
 
-func (c *ExternalCrypto) VerifyStream(in io.Reader, signature []byte, key *externalPublicKey) (res bool, err error) {
+func (c *ExternalCrypto) VerifyStream(in io.Reader, signature []byte, key interface {
+	IsPublic() bool
+	Identifier() []byte
+}) (res bool, err error) {
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -425,7 +461,7 @@ func (c *ExternalCrypto) VerifyStream(in io.Reader, signature []byte, key *exter
 	vsign := ToVirgilByteArray(signature)
 	defer DeleteVirgilByteArray(vsign)
 
-	vcontents := ToVirgilByteArray(key.contents())
+	vcontents := ToVirgilByteArray(key.(*externalPublicKey).contents())
 	defer DeleteVirgilByteArray(vcontents)
 
 	res = signer.Verify(s, vsign, vcontents)
@@ -442,7 +478,13 @@ func (c *ExternalCrypto) CalculateFingerprint(data []byte) []byte {
 	}
 }
 
-func (c *ExternalCrypto) SignThenEncrypt(data []byte, signerKey *externalPrivateKey, recipients ...*externalPublicKey) (_ []byte, err error) {
+func (c *ExternalCrypto) SignThenEncrypt(data []byte, signerKey interface {
+	IsPrivate() bool
+	Identifier() []byte
+}, recipients ...interface {
+	IsPublic() bool
+	Identifier() []byte
+}) (_ []byte, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -477,7 +519,7 @@ func (c *ExternalCrypto) SignThenEncrypt(data []byte, signerKey *externalPrivate
 
 		vrec := ToVirgilByteArray(r.Identifier())
 		defer DeleteVirgilByteArray(vrec)
-		vconts := ToVirgilByteArray(r.contents())
+		vconts := ToVirgilByteArray(r.(*externalPublicKey).contents())
 		defer DeleteVirgilByteArray(vconts)
 		ci.AddKeyRecipient(vrec, vconts)
 	}
@@ -491,7 +533,13 @@ func (c *ExternalCrypto) SignThenEncrypt(data []byte, signerKey *externalPrivate
 	return ct, nil
 }
 
-func (c *ExternalCrypto) DecryptThenVerify(data []byte, decryptionKey *externalPrivateKey, verifierKeys ...*externalPublicKey) (_ []byte, err error) {
+func (c *ExternalCrypto) DecryptThenVerify(data []byte, decryptionKey interface {
+	IsPrivate() bool
+	Identifier() []byte
+}, verifierKeys ...interface {
+	IsPublic() bool
+	Identifier() []byte
+}) (_ []byte, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -509,7 +557,7 @@ func (c *ExternalCrypto) DecryptThenVerify(data []byte, decryptionKey *externalP
 	defer DeleteVirgilByteArray(vdata)
 	vrec := ToVirgilByteArray(decryptionKey.Identifier())
 	defer DeleteVirgilByteArray(vrec)
-	vkey := ToVirgilByteArray(decryptionKey.key)
+	vkey := ToVirgilByteArray(decryptionKey.(*externalPrivateKey).key)
 	defer DeleteVirgilByteArray(vkey)
 	vpt := ci.DecryptWithKey(vdata, vrec, vkey)
 	defer DeleteVirgilByteArray(vpt)
@@ -554,7 +602,13 @@ func (c *ExternalCrypto) DecryptThenVerify(data []byte, decryptionKey *externalP
 	return plaintext, nil
 }
 
-func (c *ExternalCrypto) ExtractPublicKey(key *externalPrivateKey) (_ *externalPublicKey, err error) {
+func (c *ExternalCrypto) ExtractPublicKey(key interface {
+	IsPrivate() bool
+	Identifier() []byte
+}) (_ interface {
+	IsPublic() bool
+	Identifier() []byte
+}, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -565,7 +619,7 @@ func (c *ExternalCrypto) ExtractPublicKey(key *externalPrivateKey) (_ *externalP
 		}
 	}()
 
-	return key.ExtractPublicKey()
+	return key.(*externalPrivateKey).ExtractPublicKey()
 
 }
 

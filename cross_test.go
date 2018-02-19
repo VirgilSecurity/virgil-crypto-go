@@ -1,12 +1,9 @@
 package virgil_crypto_go
 
 import (
-	"encoding/hex"
 	"testing"
 
 	"crypto/rand"
-
-	"fmt"
 
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/virgil.v5/cryptoimpl"
@@ -34,8 +31,6 @@ func TestCrossTestCrypto(t *testing.T) {
 
 	ciphertext, err := c1.SignThenEncrypt(data, kp1.PrivateKey(), kp2pub)
 	assert.NoError(t, err)
-
-	fmt.Println(hex.EncodeToString(ciphertext))
 
 	kp1p, err := c1.ExportPublicKey(kp1.PublicKey())
 	assert.NoError(t, err)
