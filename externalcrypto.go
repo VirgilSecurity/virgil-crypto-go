@@ -51,7 +51,7 @@ type ExternalCrypto struct {
 	UseSha256Fingerprints bool
 }
 
-func NewCrypto() *ExternalCrypto {
+func NewVirgilCrypto() *ExternalCrypto {
 	return &ExternalCrypto{}
 }
 

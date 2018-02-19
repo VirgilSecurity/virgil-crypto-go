@@ -6,7 +6,7 @@ type CardCrypto struct {
 	Crypto *ExternalCrypto
 }
 
-func NewCardCrypto() *CardCrypto {
+func NewVirgilCardCrypto() *CardCrypto {
 	return &CardCrypto{Crypto: &ExternalCrypto{}}
 }
 
