@@ -1,3 +1,3 @@
 # virgil-crypto-go
 
-Master is outdated, please use branch v4
+See branches [v5](https://github.com/VirgilSecurity/virgil-crypto-go/tree/v5) and [v4](https://github.com/VirgilSecurity/virgil-crypto-go/tree/v4) for actual info
