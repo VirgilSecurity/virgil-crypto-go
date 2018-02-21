@@ -72,7 +72,7 @@ decrypted, err := crypto.Decrypt(encryptedMessage, bobPrivateKey)
 
 ## Installation
 
-VirgilCrypto is provided as a set of frameworks. These frameworks are distributed via Carthage and CocoaPods.
+The package is supported only Linux and Mac OS X. Please make sure [all dependencis](https://github.com/VirgilSecurity/virgil-crypto#build-prerequisites) are installed on your system first.
 
 To install the latest wrapper version run:
 ```
