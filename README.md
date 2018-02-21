@@ -72,7 +72,7 @@ decrypted, err := crypto.Decrypt(encryptedMessage, bobPrivateKey)
 
 ## Installation
 
-The package is supported only Linux and Mac OS X. Please make sure [all dependencis](https://github.com/VirgilSecurity/virgil-crypto#build-prerequisites) are installed on your system first.
+The package is supported only Linux and Mac OS X. Please make sure [all dependencies](https://github.com/VirgilSecurity/virgil-crypto#build-prerequisites) are installed on your system first.
 
 To install the latest wrapper version run:
 ```
