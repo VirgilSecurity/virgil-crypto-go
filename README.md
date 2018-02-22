@@ -77,7 +77,7 @@ The package is supported only Linux and Mac OS X. Please make sure [all dependen
 
 To install the latest wrapper version run:
 ```
-go get -d gopkg.in/virgilsecurity/virgil-crypto-go.v5
+go get -d -u gopkg.in/virgilsecurity/virgil-crypto-go.v5
 ```
 and then run:
 ```
