@@ -21,7 +21,7 @@ Virgil Security, Inc., guides software developers into the forthcoming security 
 
 Generate a Private Key with the default algorithm (EC_X25519):
 ```go
-crypto := cryptoimpl.NewVirgilCrypto()
+crypto := virgil_crypto_go.NewVirgilCrypto()
 keypair, err := crypto.GenerateKeypair()
 
 ```
@@ -30,7 +30,7 @@ keypair, err := crypto.GenerateKeypair()
 
 Generate signature and sign data with a private key:
 ```go
-crypto := cryptoimpl.NewVirgilCrypto()
+crypto := virgil_crypto_go.NewVirgilCrypto()
 
 // prepare a message
 dataToSign := []byte("Hello, Bob!")
@@ -41,7 +41,7 @@ signature, err := crypto.Sign(dataToSign, privateKey)
 
 Verify a signature with a public key:
 ```go
-crypto := cryptoimpl.NewVirgilCrypto()
+crypto := virgil_crypto_go.NewVirgilCrypto()
 
 // verify signature using Alice's Card
 err := crypto.VerifySignature(dataToSign, signature, alicePublicKey)
@@ -52,7 +52,7 @@ err := crypto.VerifySignature(dataToSign, signature, alicePublicKey)
 Encrypt Data on a Public Key:
 
 ```go
-crypto := cryptoimpl.NewVirgilCrypto()
+crypto := virgil_crypto_go.NewVirgilCrypto()
 
 // prepare a message
 message := []byte("Hello, Bob!")
@@ -65,7 +65,7 @@ encrypted, err := crypto.Encrypt(message, bobPublicKey)
 Decrypt the encrypted data with a Private Key:
 
 ```go
-crypto := cryptoimpl.NewVirgilCrypto()
+crypto := virgil_crypto_go.NewVirgilCrypto()
 
 // decrypt the encrypted data using a private key
 decrypted, err := crypto.Decrypt(encryptedMessage, bobPrivateKey)
@@ -74,6 +74,8 @@ decrypted, err := crypto.Decrypt(encryptedMessage, bobPrivateKey)
 ## Installation
 
 The package is supported only Linux and Mac OS X. Please make sure [all dependencies](https://github.com/VirgilSecurity/virgil-crypto#build-prerequisites) are installed on your system first.
+
+Set GOPATH variable as described [here](https://github.com/golang/go/wiki/SettingGOPATH)
 
 To install the latest wrapper version run:
 ```
@@ -94,8 +96,6 @@ or
 ```
 cryptoimpl.NewVirgilCrypto()
 ```
-
-All samples will be using cryptoimpl by default.
 
 ## Docs
 - [Crypto Core Library](https://github.com/VirgilSecurity/virgil-crypto)
