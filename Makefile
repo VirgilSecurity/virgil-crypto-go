@@ -8,4 +8,5 @@ all:
 	cmake --build _build --target install 
 	cp -r $(TEMPDIR)/_install/* .
 	rm -rf $(TEMPDIR)d
+	mv ./lib/virgil_crypto_go.a ./lib/libvirgil_crypto_go.a
 
