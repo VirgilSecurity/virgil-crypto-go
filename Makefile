@@ -10,5 +10,7 @@ all:
 	cmake --build _build --target install 
 	cp -r $(TEMPDIR)/_install/* .
 	rm -rf $(TEMPDIR)d
+	rm -rf lib/cmake/
+	rm -rf lib/pkgconfig/
 
 
