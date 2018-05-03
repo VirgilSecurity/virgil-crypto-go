@@ -1,5 +1,5 @@
 TEMPDIR := $(shell mktemp -d)
-BRANCH ?=release-2.4.0
+BRANCH ?=v2.4.0
 
 all:
 	rm -rf lib/
