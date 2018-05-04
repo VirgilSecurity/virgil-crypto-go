@@ -115,6 +115,55 @@ func (c *ExternalCrypto) GenerateKeypair() (_ *externalKeypair, err error) {
 	}, nil
 }
 
+func (c *ExternalCrypto) GenerateKeypairFromKeyMaterial(keyMaterial []byte) (_ *externalKeypair, err error) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			var ok bool
+			err, ok = r.(error)
+			if !ok {
+				err = fmt.Errorf("pkg: %v", r)
+			}
+		}
+	}()
+
+	keyType, ok := KeyTypeMap[c.keyType]
+	if !ok {
+		return nil, errors.New("This key type is not supported")
+	}
+
+	seed := ToVirgilByteArray(keyMaterial)
+	defer DeleteVirgilByteArray(seed)
+
+	kp := VirgilKeyPairGenerateFromKeyMaterial(keyType, seed)
+	defer DeleteVirgilKeyPair(kp)
+
+	der := VirgilKeyPairPublicKeyToDER(kp.PublicKey())
+	defer DeleteVirgilByteArray(der)
+
+	rawPub := ToSlice(der)
+	receiverId := c.CalculateFingerprint(rawPub)
+
+	pub := &externalPublicKey{
+		key:        rawPub,
+		receiverID: receiverId,
+	}
+
+	der1 := VirgilKeyPairPrivateKeyToDER(kp.PrivateKey())
+	defer DeleteVirgilByteArray(der1)
+	rawPriv := ToSlice(der1)
+
+	priv := &externalPrivateKey{
+		key:        rawPriv,
+		receiverID: receiverId,
+	}
+
+	return &externalKeypair{
+		publicKey:  pub,
+		privateKey: priv,
+	}, nil
+}
+
 func (c *ExternalCrypto) ImportPrivateKey(data []byte, password string) (_ interface {
 	IsPrivate() bool
 	Identifier() []byte

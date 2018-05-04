@@ -3,6 +3,7 @@ package virgil_crypto_go
 import (
 	"bytes"
 	"crypto/rand"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -212,4 +213,46 @@ func TestNativeCrypto_ExportImportPrivateKey(t *testing.T) {
 		t.Fatal(err)
 	}
 
+}
+
+func TestExternalCrypto_GenerateKeypairFromKeyMaterial(t *testing.T) {
+
+
+	seed := make([]byte, 384)
+	for i := range seed {
+		seed[i] = byte(i)
+	}
+
+	pub1, priv1, err := GenKeysFromSeed(seed)
+	assert.NoError(t, err)
+
+	for i := 0; i < 10; i++ {
+		pub2, priv2, err := GenKeysFromSeed(seed)
+		assert.NoError(t, err)
+		assert.Equal(t, pub1, pub2)
+		assert.Equal(t, priv1, priv2)
+	}
+
+	seed[383] = seed[383] + 1
+	pub3, priv3, err := GenKeysFromSeed(seed)
+	assert.NoError(t, err)
+
+	assert.NotEqual(t, pub1, pub3)
+	assert.NotEqual(t, priv1, priv3)
+}
+
+func GenKeysFromSeed(seed []byte) (publicKey []byte, privateKey []byte, err error) {
+	crypto := &ExternalCrypto{}
+	keypair, err := crypto.GenerateKeypairFromKeyMaterial(seed)
+	if err != nil {
+		return
+	}
+
+	publicKey, err = crypto.ExportPublicKey(keypair.PublicKey())
+	if err != nil {
+		return
+	}
+
+	privateKey, err = crypto.ExportPrivateKey(keypair.PrivateKey(), "")
+	return
 }
