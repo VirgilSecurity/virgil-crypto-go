@@ -202,14 +202,12 @@ func BenchmarkEval(b *testing.B) {
 	}
 
 	b.ResetTimer()
-	b.RunParallel(func(pb *testing.PB) {
-		for pb.Next() {
-			_, _, err := p.Transform(blinded, []byte(username), sk)
-			if err != nil {
-				panic(err)
-			}
+	for i := 0; i < b.N; i++ {
+		_, _, err := p.Transform(blinded, []byte(username), sk)
+		if err != nil {
+			panic(err)
 		}
-	})
+	}
 
 }
 
@@ -229,14 +227,12 @@ func BenchmarkDeblind(b *testing.B) {
 		panic(err)
 	}
 	b.ResetTimer()
-	b.RunParallel(func(pb *testing.PB) {
-		for pb.Next() {
-			_, err := p.Deblind(y, secret)
-			if err != nil {
-				panic(err)
-			}
+	for i := 0; i < b.N; i++ {
+		_, err := p.Deblind(y, secret)
+		if err != nil {
+			panic(err)
 		}
-	})
+	}
 
 }
 
@@ -255,12 +251,10 @@ func BenchmarkProve(b *testing.B) {
 		panic(err)
 	}
 	b.ResetTimer()
-	b.RunParallel(func(pb *testing.PB) {
-		for pb.Next() {
-			_, _, err := p.Prove(y, blinded, tTilde, sk, pk)
-			assert.NoError(b, err)
-		}
-	})
+	for i := 0; i < b.N; i++ {
+		_, _, err := p.Prove(y, blinded, tTilde, sk, pk)
+		assert.NoError(b, err)
+	}
 
 }
 
@@ -284,13 +278,10 @@ func BenchmarkVerify(b *testing.B) {
 	assert.NoError(b, err)
 
 	b.ResetTimer()
-	b.RunParallel(func(pb *testing.PB) {
-		for pb.Next() {
-			for i := 0; i < b.N; i++ {
-				assert.Nil(b, p.Verify(y, blinded, []byte(username), pk, c, u))
-			}
-		}
-	})
+
+	for i := 0; i < b.N; i++ {
+		assert.Nil(b, p.Verify(y, blinded, []byte(username), pk, c, u))
+	}
 
 }
 
@@ -306,12 +297,10 @@ func BenchmarkGetToken(b *testing.B) {
 		panic(err)
 	}
 
-	b.RunParallel(func(pb *testing.PB) {
-		for pb.Next() {
-			_, err := p.GetPasswordUpdateToken(sk1, sk2)
-			assert.NoError(b, err)
-		}
-	})
+	for i := 0; i < b.N; i++ {
+		_, err := p.GetPasswordUpdateToken(sk1, sk2)
+		assert.NoError(b, err)
+	}
 }
 
 func BenchmarkUpdateWithToken(b *testing.B) {
@@ -330,10 +319,8 @@ func BenchmarkUpdateWithToken(b *testing.B) {
 	assert.NoError(b, err)
 	res1, _ := hex.DecodeString(deblinded1)
 	b.ResetTimer()
-	b.RunParallel(func(pb *testing.PB) {
-		for pb.Next() {
-			_, err := p.UpdateDeblindedWithToken(res1, token)
-			assert.NoError(b, err)
-		}
-	})
+	for i := 0; i < b.N; i++ {
+		_, err := p.UpdateDeblindedWithToken(res1, token)
+		assert.NoError(b, err)
+	}
 }
