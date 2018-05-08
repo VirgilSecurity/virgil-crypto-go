@@ -1,6 +1,6 @@
 # Virgil Security Go Crypto Library
 [![GitHub license](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://github.com/VirgilSecurity/virgil/blob/master/LICENSE)
-[![Build Status](https://travis-ci.org/go-virgil/virgil.png?branch=v5)](https://travis-ci.org/go-virgil/virgil)
+[![Build Status](https://travis-ci.org/VirgilSecurity/virgil-crypto-go.png?branch=v5)](https://travis-ci.org/VirgilSecurity/virgil-crypto-go)
 
 ### [Introduction](#introduction) | [Library purposes](#library-purposes) | [Usage examples](#usage-examples) | [Installation](#installation) | [Docs](#docs) | [License](#license) | [Contacts](#support)
 
