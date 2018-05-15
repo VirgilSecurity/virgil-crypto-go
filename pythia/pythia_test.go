@@ -85,7 +85,6 @@ func TestBadBufFails(t *testing.T) {
 }
 
 func TestBlindEvalDeblind(t *testing.T) {
-	t.Parallel()
 	vals := make(map[string]bool)
 
 	sk, _, err := p.ComputeTransformationKeypair([]byte(domain1), []byte(msk1), []byte(sss1))
@@ -119,7 +118,6 @@ func TestBlindEvalDeblind(t *testing.T) {
 }
 
 func TestFullProto(t *testing.T) {
-	t.Parallel()
 
 	sk, pk, err := p.ComputeTransformationKeypair([]byte(domain1), []byte(msk1), []byte(sss1))
 	assert.NoError(t, err)
@@ -133,7 +131,6 @@ func TestFullProto(t *testing.T) {
 }
 
 func TestUpdateWithToken(t *testing.T) {
-	t.Parallel()
 
 	sk, pk, err := p.ComputeTransformationKeypair([]byte(domain1), []byte(msk1), []byte(sss1))
 	assert.NoError(t, err)
@@ -179,14 +176,13 @@ func simpleProto(password, userName string, privateKey []byte) (blinded []byte, 
 
 func BenchmarkBlind(b *testing.B) {
 
-	b.RunParallel(func(pb *testing.PB) {
-		for pb.Next() {
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
 			_, _, err := p.Blind([]byte(password))
 			if err != nil {
 				panic(err)
 			}
 		}
-	})
 
 }
 
