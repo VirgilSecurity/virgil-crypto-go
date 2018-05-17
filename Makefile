@@ -1,5 +1,5 @@
 TEMPDIR := $(shell mktemp -d)
-BRANCH ?=v2.4.3
+BRANCH ?=master
 
 all:
 	rm -rf lib/
