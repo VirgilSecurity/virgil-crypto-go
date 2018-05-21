@@ -48,10 +48,16 @@ func (e *externalKeypair) HasPublic() bool {
 func (e *externalKeypair) HasPrivate() bool {
 	return e.privateKey != nil && !e.privateKey.Empty()
 }
-func (e *externalKeypair) PublicKey() *externalPublicKey {
+func (e *externalKeypair) PublicKey() interface {
+	IsPublic() bool
+	Identifier() []byte
+} {
 	return e.publicKey
 }
-func (e *externalKeypair) PrivateKey() *externalPrivateKey {
+func (e *externalKeypair) PrivateKey() interface {
+	IsPrivate() bool
+	Identifier() []byte
+} {
 	return e.privateKey
 }
 

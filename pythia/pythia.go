@@ -40,6 +40,7 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
+	"gopkg.in/virgilsecurity/virgil-crypto-go.v5"
 )
 
 var (
@@ -359,4 +360,21 @@ func (p *Pythia) UpdateDeblindedWithToken(deblindedPassword, passwordUpdateToken
 	}
 
 	return updatedDeblindedPasswordBuf.GetData(), nil
+}
+
+func (p *Pythia) GenerateKeypair(keypairType virgil_crypto_go.KeyType, seed []byte) (keypair interface {
+	PublicKey() interface {
+		IsPublic() bool
+		Identifier() []byte
+	}
+
+	PrivateKey() interface {
+		IsPrivate() bool
+		Identifier() []byte
+	}
+}, err error) {
+	crypto := virgil_crypto_go.NewVirgilCrypto()
+	crypto.SetKeyType(keypairType)
+	keypair, err = crypto.GenerateKeypairFromKeyMaterial(seed)
+	return
 }
