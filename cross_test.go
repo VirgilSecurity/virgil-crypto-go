@@ -75,3 +75,67 @@ func TestCrossTestCrypto(t *testing.T) {
 	assert.Equal(t, decrypted, data)
 
 }
+
+
+func TestTokenSigner(t *testing.T){
+	c1 := &ExternalCrypto{}
+	c2 := &cryptoimpl.VirgilCrypto{}
+
+	v1 := NewVirgilAccessTokenSigner()
+	v2 := cryptoimpl.NewVirgilAccessTokenSigner()
+
+	kp1, err := c1.GenerateKeypair()
+	assert.NoError(t, err)
+
+	exported, err := c1.ExportPrivateKey(kp1.PrivateKey(),"")
+	assert.NoError(t, err)
+
+	sk2, err := c2.ImportPrivateKey(exported, "")
+	assert.NoError(t, err)
+
+	pk2, err := c2.ExtractPublicKey(sk2)
+
+	data := make([]byte, 257)
+	rand.Read(data)
+
+	sig1, err := v1.GenerateTokenSignature(data,kp1.PrivateKey())
+	assert.NoError(t, err)
+
+	err = v2.VerifyTokenSignature(data, sig1, pk2)
+	assert.NoError(t, err)
+}
+
+func BenchmarkVirgilAccessTokenSigner_VerifyTokenSignature(b *testing.B) {
+
+	c1 := &ExternalCrypto{}
+	kp1, err := c1.GenerateKeypair()
+	assert.NoError(b, err)
+	data := make([]byte, 257)
+	rand.Read(data)
+	v1 := NewVirgilAccessTokenSigner()
+	sig1, err := v1.GenerateTokenSignature(data,kp1.PrivateKey())
+	assert.NoError(b, err)
+
+	for i := 0; i < b.N; i++ {
+		err = v1.VerifyTokenSignature(data, sig1, kp1.PublicKey())
+		assert.NoError(b, err)
+	}
+}
+
+
+func BenchmarkInternalVirgilAccessTokenSigner_VerifyTokenSignature(b *testing.B) {
+
+	c1 :=  &cryptoimpl.VirgilCrypto{}
+	kp1, err := c1.GenerateKeypair()
+	assert.NoError(b, err)
+	data := make([]byte, 257)
+	rand.Read(data)
+	v1 := cryptoimpl.NewVirgilAccessTokenSigner()
+	sig1, err := v1.GenerateTokenSignature(data,kp1.PrivateKey())
+	assert.NoError(b, err)
+
+	for i := 0; i < b.N; i++ {
+		err = v1.VerifyTokenSignature(data, sig1, kp1.PublicKey())
+		assert.NoError(b, err)
+	}
+}

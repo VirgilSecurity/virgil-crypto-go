@@ -67,6 +67,29 @@ func TestSignEncrypt(t *testing.T) {
 
 }
 
+func BenchmarkSign(b *testing.B) {
+	crypto := &ExternalCrypto{}
+
+	//make random data
+	data := make([]byte, 257)
+	rand.Read(data)
+
+	signerKeypair, err := crypto.GenerateKeypair()
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	sign, err := crypto.Sign(data, signerKeypair.PrivateKey())
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		crypto.VerifySignature(data,sign, signerKeypair.publicKey)
+	}
+}
+
 func BenchmarkSignThenEncrypt(b *testing.B) {
 
 	crypto := &ExternalCrypto{}
