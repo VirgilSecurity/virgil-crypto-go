@@ -42,6 +42,7 @@ import (
 	"crypto/rand"
 
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/virgilsecurity/virgil-crypto-go.v5"
 )
 
 const (
@@ -205,6 +206,50 @@ func BenchmarkEval(b *testing.B) {
 		}
 	}
 
+}
+func BenchmarkBlindCpp(b *testing.B) {
+	vp := virgil_crypto_go.NewVirgilPythia()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		pwd := virgil_crypto_go.ToVirgilByteArray([]byte(password))
+		vp.Blind(pwd)
+		virgil_crypto_go.DeleteVirgilByteArray(pwd)
+	}
+	virgil_crypto_go.DeleteVirgilPythia(vp)
+}
+
+func BenchmarkEvalCpp(b *testing.B) {
+
+	cppp := virgil_crypto_go.NewVirgilPythia()
+	defer virgil_crypto_go.DeleteVirgilPythia(cppp)
+	pwd := virgil_crypto_go.ToVirgilByteArray([]byte(password))
+	defer virgil_crypto_go.DeleteVirgilByteArray(pwd)
+	blinded := cppp.Blind(pwd)
+	defer virgil_crypto_go.DeleteVirgilPythiaBlindResult(blinded)
+
+	domain := virgil_crypto_go.ToVirgilByteArray([]byte(domain1))
+	msk := virgil_crypto_go.ToVirgilByteArray([]byte(msk1))
+	sss := virgil_crypto_go.ToVirgilByteArray([]byte(sss1))
+	defer virgil_crypto_go.DeleteVirgilByteArray(domain)
+	defer virgil_crypto_go.DeleteVirgilByteArray(msk)
+	defer virgil_crypto_go.DeleteVirgilByteArray(sss)
+
+	kp := cppp.ComputeTransformationKeyPair(domain, msk, sss)
+	defer virgil_crypto_go.DeleteVirgilPythiaTransformationKeyPair(kp)
+
+	sk := virgil_crypto_go.ToSlice(kp.PrivateKey())
+	bpwd := virgil_crypto_go.ToSlice(blinded.BlindedPassword())
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		username := virgil_crypto_go.ToVirgilByteArray([]byte(username))
+		pwdd := virgil_crypto_go.ToVirgilByteArray(bpwd)
+		ssk := virgil_crypto_go.ToVirgilByteArray(sk)
+		cppp.Transform(pwdd,username, ssk)
+		virgil_crypto_go.DeleteVirgilByteArray(username)
+		virgil_crypto_go.DeleteVirgilByteArray(pwdd)
+		virgil_crypto_go.DeleteVirgilByteArray(ssk)
+	}
 }
 
 func BenchmarkDeblind(b *testing.B) {

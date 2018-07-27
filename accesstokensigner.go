@@ -51,7 +51,7 @@ func (t *VirgilAccessTokenSigner) VerifyTokenSignature(data []byte, signature []
 	IsPublic() bool
 	Identifier() []byte
 }) error {
-	return t.Crypto.VerifySignature(data, signature, publicKey)
+	return t.Crypto.VerifyHashTypeSignature(SHA512, data, signature, publicKey)
 
 }
 func (t *VirgilAccessTokenSigner) GetAlgorithm() string {

@@ -452,6 +452,44 @@ func (c *ExternalCrypto) VerifySignature(data []byte, signature []byte, key inte
 	return nil
 }
 
+
+func (c *ExternalCrypto) VerifyHashTypeSignature(hashType HashType, data []byte, signature []byte, key interface {
+	IsPublic() bool
+	Identifier() []byte
+}) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			var ok bool
+			err, ok = r.(error)
+			if !ok {
+				err = fmt.Errorf("pkg: %v", r)
+			}
+		}
+	}()
+	s := NewVirgilSigner(VirgilHashAlgorithm_SHA512)
+	defer DeleteVirgilSigner(s)
+
+	hdata := ToVirgilByteArray(data)
+	defer DeleteVirgilByteArray(hdata)
+	vsignature := ToVirgilByteArray(signature)
+	defer DeleteVirgilByteArray(vsignature)
+	vcontents := ToVirgilByteArray(key.(*externalPublicKey).contents())
+	defer DeleteVirgilByteArray(vcontents)
+
+	valid := s.Verify(hdata, vsignature, vcontents)
+
+	if !valid {
+		return errors.New("invalid signature")
+	}
+
+	algo := s.GetHashAlgorithm()
+	if hashType != HashType(algo){
+		return errors.New("unsupported signature hash type")
+	}
+
+	return nil
+}
+
 func (c *ExternalCrypto) SignStream(in io.Reader, signerKey interface {
 	IsPrivate() bool
 	Identifier() []byte
