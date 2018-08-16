@@ -407,7 +407,15 @@ func (c *ExternalCrypto) Sign(data []byte, signer interface {
 		}
 	}()
 
-	s := NewVirgilSigner(VirgilHashAlgorithm_SHA512)
+
+	var algo interface{}
+	if c.UseSha256Fingerprints{
+		algo = VirgilHashAlgorithm_SHA256
+	} else {
+		algo = VirgilHashAlgorithm_SHA512
+	}
+
+	s := NewVirgilSigner(algo)
 	defer DeleteVirgilSigner(s)
 	vdata := ToVirgilByteArray(data)
 	defer DeleteVirgilByteArray(vdata)
