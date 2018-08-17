@@ -213,7 +213,27 @@ func (c *ExternalCrypto) ImportPublicKey(data []byte) (_ interface {
 	IsPublic() bool
 	Identifier() []byte
 }, err error) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			var ok bool
+			err, ok = r.(error)
+			if !ok {
+				err = fmt.Errorf("pkg: %v", r)
+			}
+		}
+	}()
+
+
 	rawPub := unwrapKey(data)
+
+	bpub := ToVirgilByteArray(rawPub)
+	defer DeleteVirgilByteArray(bpub)
+
+	derKey := VirgilKeyPairPublicKeyToDER(bpub)
+	defer DeleteVirgilByteArray(derKey)
+
+	rawPub = ToSlice(derKey)
 	receiverId := c.CalculateFingerprint(rawPub)
 
 	return &externalPublicKey{

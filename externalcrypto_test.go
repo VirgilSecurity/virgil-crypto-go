@@ -311,3 +311,24 @@ func GenKeysFromSeed(seed []byte) (publicKey []byte, privateKey []byte, err erro
 	privateKey, err = crypto.ExportPrivateKey(keypair.PrivateKey(), "")
 	return
 }
+
+func TestExternalCrypto_ImportPublicKey(t *testing.T) {
+	crypto := &ExternalCrypto{}
+
+	keypair, err := crypto.GenerateKeypair()
+	assert.NoError(t, err)
+
+	pkDer, err := crypto.ExportPublicKey(keypair.PublicKey())
+
+	assert.NoError(t, err)
+
+	pk, err := crypto.ImportPublicKey(pkDer)
+	assert.NoError(t, err)
+	assert.NotNil(t, pk)
+
+	pk, err = crypto.ImportPublicKey([]byte{1,2,3,4,5,6})
+
+	assert.Nil(t, pk)
+	assert.Error(t, err)
+
+}
