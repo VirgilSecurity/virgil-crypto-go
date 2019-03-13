@@ -38,8 +38,6 @@ package pythia
 import "C"
 import (
 	"fmt"
-
-	"github.com/pkg/errors"
 	"gopkg.in/virgilsecurity/virgil-crypto-go.v5"
 )
 
@@ -80,7 +78,7 @@ func (p *Pythia) Blind(password []byte) (blindedPassword, blindingSecret []byte,
 
 	pErr := C.virgil_pythia_blind(passwordBuf.inBuf, blindedPasswordBuf.inBuf, blindingSecretBuf.inBuf)
 	if pErr != 0 {
-		err = errors.New("Internal Pythia error")
+		err = NewPythiaError(int(pErr), "Internal Pythia error")
 		return
 	}
 
@@ -109,7 +107,7 @@ func (p *Pythia) Deblind(transformedPassword []byte, blindingSecret []byte) (deb
 	defer deblindedBuf.Close()
 	pErr := C.virgil_pythia_deblind(transformedPasswordBuf.inBuf, secretBuf.inBuf, deblindedBuf.inBuf)
 	if pErr != 0 {
-		err = errors.New("Internal Pythia error")
+		err = NewPythiaError(int(pErr), "Internal Pythia error")
 		return
 	}
 
@@ -155,7 +153,7 @@ func (p *Pythia) ComputeTransformationKeypair(transformationKeyId, pythiaSecret,
 
 	pErr := C.virgil_pythia_compute_transformation_key_pair(transformationKeyIdBuf.inBuf, pythiaSecretBuf.inBuf, pythiaScopeSecretBuf.inBuf, privateKeyBuf.inBuf, publicKeyBuf.inBuf)
 	if pErr != 0 {
-		err = errors.New("Internal Pythia error")
+		err = NewPythiaError(int(pErr), "Internal Pythia error")
 		return
 	}
 
@@ -202,7 +200,7 @@ func (p *Pythia) Transform(blindedPassword, tweak, transformationPrivateKey []by
 
 	pErr := C.virgil_pythia_transform(blindedPasswordBuf.inBuf, tweakBuf.inBuf, transformationPrivateKeyBuf.inBuf, transformedPasswordBuf.inBuf, transformedTweakBuf.inBuf)
 	if pErr != 0 {
-		err = errors.New("Internal Pythia error")
+		err = NewPythiaError(int(pErr), "Internal Pythia error")
 		return
 	}
 
@@ -245,7 +243,7 @@ func (p *Pythia) Prove(transformedPassword, blindedPassword, transformedTweak, t
 
 	pErr := C.virgil_pythia_prove(transformedPasswordBuf.inBuf, blindedPasswordBuf.inBuf, transformedTweakBuf.inBuf, transformationPrivateKeyBuf.inBuf, transformationPublicKeyBuf.inBuf, proofValueCBuf.inBuf, proofValueUBuf.inBuf)
 	if pErr != 0 {
-		err = errors.New("Internal Pythia error")
+		err = NewPythiaError(int(pErr), "Internal Pythia error")
 		return
 	}
 
@@ -292,12 +290,12 @@ func (p *Pythia) Verify(transformedPassword, blindedPassword, tweak, transformat
 
 	pErr := C.virgil_pythia_verify(transformedPasswordBuf.inBuf, blindedPasswordBuf.inBuf, tweakBuf.inBuf, transformationPublicKeyBuf.inBuf, proofValueCBuf.inBuf, proofValueUBuf.inBuf, &verified)
 	if pErr != 0 {
-		err = errors.New("Internal Pythia error")
+		err = NewPythiaError(int(pErr), "Internal Pythia error")
 		return
 	}
 
 	if int(verified) != 1 {
-		return errors.New("Verification failed")
+		return NewPythiaError(int(pErr), "Verification failed")
 	}
 
 	return nil
@@ -326,7 +324,7 @@ func (p *Pythia) GetPasswordUpdateToken(previousTransformationPrivateKey, newTra
 
 	pErr := C.virgil_pythia_get_password_update_token(previousTransformationPrivateKeyBuf.inBuf, newTransformationPrivateKeyBuf.inBuf, passwordUpdateTokenBuf.inBuf)
 	if pErr != 0 {
-		err = errors.New("Internal Pythia error")
+		err = NewPythiaError(int(pErr), "Internal Pythia error")
 		return
 	}
 
@@ -355,7 +353,7 @@ func (p *Pythia) UpdateDeblindedWithToken(deblindedPassword, passwordUpdateToken
 	defer updatedDeblindedPasswordBuf.Close()
 	pErr := C.virgil_pythia_update_deblinded_with_token(deblindedPasswordBuf.inBuf, passwordUpdateTokenBuf.inBuf, updatedDeblindedPasswordBuf.inBuf)
 	if pErr != 0 {
-		err = errors.New("Internal Pythia error")
+		err = NewPythiaError(int(pErr), "Internal Pythia error")
 		return
 	}
 
