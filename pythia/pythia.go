@@ -32,13 +32,16 @@
 
 package pythia
 
-// #cgo CFLAGS:  -I${SRCDIR}/../include -I${SRCDIR}/../include/virgil/crypto/pythia
-// #cgo LDFLAGS: -L${SRCDIR}/../lib -lvirgil_crypto -lmbedcrypto -lstdc++ -lpythia -lrelic_s
+// #cgo darwin CFLAGS:  -I${SRCDIR}/../pkg/darwin_amd64/include -I${SRCDIR}/../pkg/darwin_amd64/include/virgil/crypto/pythia
+// #cgo darwin LDFLAGS: -L${SRCDIR}/../pkg/darwin_amd64/lib -lvirgil_crypto -lmbedcrypto -lstdc++ -lpythia -lrelic_s
+// #cgo linux,amd64 CFLAGS:  -I${SRCDIR}/../pkg/linux_amd64/include -I${SRCDIR}/../pkg/darwin_amd64/include/virgil/crypto/pythia
+// #cgo linux,amd64 LDFLAGS: -L${SRCDIR}/../pkg/linux_amd64/lib -lvirgil_crypto -lmbedcrypto -lstdc++ -lpythia -lrelic_s
 // #include "virgil_pythia_c.h"
 import "C"
 import (
 	"fmt"
-	"gopkg.in/virgilsecurity/virgil-crypto-go.v5"
+
+	virgil_crypto_go "github.com/VirgilSecurity/virgil-crypto-go"
 )
 
 var (

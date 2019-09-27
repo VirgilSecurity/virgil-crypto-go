@@ -41,8 +41,8 @@ import (
 
 	"crypto/rand"
 
+	virgil_crypto_go "github.com/VirgilSecurity/virgil-crypto-go"
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/virgilsecurity/virgil-crypto-go.v5"
 )
 
 const (
@@ -179,11 +179,11 @@ func BenchmarkBlind(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-			_, _, err := p.Blind([]byte(password))
-			if err != nil {
-				panic(err)
-			}
+		_, _, err := p.Blind([]byte(password))
+		if err != nil {
+			panic(err)
 		}
+	}
 
 }
 
@@ -245,7 +245,7 @@ func BenchmarkEvalCpp(b *testing.B) {
 		username := virgil_crypto_go.ToVirgilByteArray([]byte(username))
 		pwdd := virgil_crypto_go.ToVirgilByteArray(bpwd)
 		ssk := virgil_crypto_go.ToVirgilByteArray(sk)
-		cppp.Transform(pwdd,username, ssk)
+		cppp.Transform(pwdd, username, ssk)
 		virgil_crypto_go.DeleteVirgilByteArray(username)
 		virgil_crypto_go.DeleteVirgilByteArray(pwdd)
 		virgil_crypto_go.DeleteVirgilByteArray(ssk)

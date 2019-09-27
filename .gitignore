@@ -26,7 +26,5 @@ _testmain.go
 *.out
 vendor/
 
-include/
-lib/
 sample/
 virgil_crypto_go.go
