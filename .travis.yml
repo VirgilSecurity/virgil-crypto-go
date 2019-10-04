@@ -55,7 +55,7 @@ matrix:
 
 env:
   global:
-    - GO111MODULE=mod
+    - GO111MODULE=on
 
 before_install:
   - eval "${MATRIX_EVAL}"
