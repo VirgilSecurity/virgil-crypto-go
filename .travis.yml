@@ -5,17 +5,16 @@ go:
 
 matrix:
   include:
-    - os: linux
-      dist: precise
-      sudo: required
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-4.9
-      env:
-        - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9"
+    # - os: linux
+    #   sudo: required
+    #   addons:
+    #     apt:
+    #       sources:
+    #         - ubuntu-toolchain-r-test
+    #       packages:
+    #         - g++-4.9
+    #   env:
+    #     - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9"
     - os: linux
       dist: precise
       sudo: required
@@ -27,31 +26,30 @@ matrix:
             - g++-5
       env:
         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
-    # works on Precise and Trusty
-    - os: linux
-      dist: precise
-      sudo: required
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-6
-      env:
-        - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
-
-    # works on Precise and Trusty
-    - os: linux
-      dist: precise
-      sudo: required
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-7
-      env:
-        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+    # # works on Precise and Trusty
+    # - os: linux
+    #   dist: precise
+    #   sudo: required
+    #   addons:
+    #     apt:
+    #       sources:
+    #         - ubuntu-toolchain-r-test
+    #       packages:
+    #         - g++-6
+    #   env:
+    #     - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
+    # # works on Precise and Trusty
+    # - os: linux
+    #   dist: precise
+    #   sudo: required
+    #   addons:
+    #     apt:
+    #       sources:
+    #         - ubuntu-toolchain-r-test
+    #       packages:
+    #         - g++-7
+    #   env:
+    #     - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
 
 env:
   global:
@@ -61,5 +59,6 @@ before_install:
   - eval "${MATRIX_EVAL}"
 
 script:
+  - ${CC} --version
   - go mod download
   - go test -mod=readonly ./...
