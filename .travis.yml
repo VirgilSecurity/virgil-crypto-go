@@ -12,97 +12,107 @@ matrix:
     ##########################################################################
 
     # XCode 8.3
-    - os: osx
-      osx_image: xcode8.3
-      # env:
-      #   - CC=clang-3.6
-      #   - CXX=clang++-3.6
-      #   - GO_BUILD_PARAM="-tags gcc48"
-      compiler: clang
-    - os: osx
-      osx_image: xcode6.4
-      compiler: clang
+    # - os: osx
+    #   osx_image: xcode11
+    #   compiler: clang
+    # - os: osx
+    #   osx_image: xcode8.3
+    #   compiler: clang
+    # - os: osx
+    #   osx_image: xcode6.4
+    #   compiler: clang
 
-    # ##########################################################################
-    # # GCC on Linux
-    # ##########################################################################
-    # - os: linux
-    #   dist: precise
-    #   addons:
-    #     apt:
-    #       sources:
-    #         - ubuntu-toolchain-r-test
-    #       packages:
-    #         - g++-4.9
-    #   env:
-    #     - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9 && GO_BUILD_PARAM='-tags gcc48'"
-    # - os: linux
-    #   dist: trusty
-    #   addons:
-    #     apt:
-    #       sources:
-    #         - ubuntu-toolchain-r-test
-    #       packages:
-    #         - g++-4.9
-    #   env:
-    #     - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9 && GO_BUILD_PARAM='-tags gcc48'"
-    # - os: linux
-    #   dist: xenial
-    #   addons:
-    #     apt:
-    #       sources:
-    #         - ubuntu-toolchain-r-test
-    #       packages:
-    #         - g++-4.9
-    #   env:
-    #     - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9 && GO_BUILD_PARAM='-tags gcc48'"
-    # - os: linux
-    #   addons:
-    #     apt:
-    #       sources:
-    #         - ubuntu-toolchain-r-test
-    #       packages:
-    #         - g++-5
-    #   env:
-    #     - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
-    # # works on Precise and Trusty
-    # - os: linux
-    #   addons:
-    #     apt:
-    #       sources:
-    #         - ubuntu-toolchain-r-test
-    #       packages:
-    #         - g++-6
-    #   env:
-    #     - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
-    # # works on Precise and Trusty
-    # - os: linux
-    #   addons:
-    #     apt:
-    #       sources:
-    #         - ubuntu-toolchain-r-test
-    #       packages:
-    #         - g++-7
-    #   env:
-    #     - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
-    # - os: linux
-    #   addons:
-    #     apt:
-    #       sources:
-    #         - ubuntu-toolchain-r-test
-    #       packages:
-    #         - g++-8
-    #   env:
-    #     - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
-    # - os: linux
-    #   addons:
-    #     apt:
-    #       sources:
-    #         - ubuntu-toolchain-r-test
-    #       packages:
-    #         - g++-9
-    #   env:
-    #     - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
+    ##########################################################################
+    # GCC on Linux
+    ##########################################################################
+    - os: linux
+      dist: precise
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.9
+      env:
+        - CC=gcc-4.9
+        - CXX=g++-4.9
+        - GO_BUILD_PARAM="-tags legacy_os"
+    - os: linux
+      dist: trusty
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.9
+      env:
+        - CC=gcc-4.9
+        - CXX=g++-4.9
+        - GO_BUILD_PARAM="-tags legacy_os"
+    - os: linux
+      dist: xenial
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.9
+      env:
+        - CC=gcc-4.9
+        - CXX=g++-4.9
+        - GO_BUILD_PARAM='-tags legacy_os'
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-5
+      env:
+        - CC=gcc-5
+        - CXX=g++-5
+    # works on Precise and Trusty
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-6
+      env:
+        - CC=gcc-6
+        - CXX=g++-6
+    # works on Precise and Trusty
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+      env:
+        - CC=gcc-7
+        - CXX=g++-7
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-8
+      env:
+        - CC=gcc-8
+        - CXX=g++-8
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-9
+      env:
+        - CC=gcc-9
+        - CXX=g++-9
     ##########################################################################
     # Clang on Linux
     ##########################################################################
@@ -118,7 +128,7 @@ matrix:
     #   env:
     #     - CC=clang-3.6
     #     - CXX=clang++-3.6
-    #     - GO_BUILD_PARAM="-tags gcc48"
+    #     - GO_BUILD_PARAM="-tags legacy_os"
     # - os: linux
     #   dist: trusty
     #   addons:
@@ -130,7 +140,7 @@ matrix:
     #   env:
     #     - CC=clang-4.0
     #     - CXX=clang++-4.0
-    #     - GO_BUILD_PARAM="-tags gcc48"
+    #     - GO_BUILD_PARAM="-tags legacy_os"
     # - os: linux
     #   dist: trusty
     #   addons:
@@ -142,7 +152,7 @@ matrix:
     #   env:
     #     - CC=clang-5.0
     #     - CXX=clang++-5.0
-    #     - GO_BUILD_PARAM="-tags gcc48"
+    #     - GO_BUILD_PARAM="-tags legacy_os"
     # - os: linux
     #   dist: trusty
     #   addons:
@@ -157,7 +167,7 @@ matrix:
     #   env:
     #     - CC=clang-6.0
     #     - CXX=clang++-6.0
-    #     - GO_BUILD_PARAM="-tags gcc48"
+    #     - GO_BUILD_PARAM="-tags legacy_os"
     # - os: linux
     #   dist: xenial
     #   addons:
