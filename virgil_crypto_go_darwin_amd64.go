@@ -30,7 +30,7 @@ typedef struct { void* array; intgo len; intgo cap; } _goslice_;
 
 
 #cgo CPPFLAGS: -I${SRCDIR}/pkg/darwin_amd64/include
-#cgo LDFLAGS: -L${SRCDIR}/pkg/darwin_amd64/lib -lvirgil_crypto_go -lvirgil_crypto -lmbedcrypto -led25519 -lstdc++
+#cgo LDFLAGS: -L${SRCDIR}/pkg/darwin_amd64/lib -lvirgil_crypto_go -lvirgil_crypto -lmbedcrypto -led25519 -lstdc++ 
 
 
 #cgo LDFLAGS: -lpythia -lrelic_s

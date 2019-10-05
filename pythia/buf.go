@@ -32,7 +32,7 @@
 
 package pythia
 
-// #include "virgil_pythia_c.h"
+// #include "virgil/crypto/pythia/virgil_pythia_c.h"
 import "C"
 
 // Buf is needed to pass memory from Go to C and back
