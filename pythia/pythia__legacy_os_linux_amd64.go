@@ -1,4 +1,4 @@
-// +build gcc48
+// +build legacy_os
 
 /*
  * BSD 3-Clause License
@@ -34,6 +34,6 @@
 
 package pythia
 
-// #cgo CFLAGS:  -I${SRCDIR}/../pkg/linux_amd64__gcc48/include
-// #cgo LDFLAGS: -L${SRCDIR}/../pkg/linux_amd64__gcc48/lib -lvirgil_crypto -lmbedcrypto -lstdc++ -lpythia -lrelic_s
+// #cgo CFLAGS:  -I${SRCDIR}/../pkg/linux_amd64__legacy_os/include
+// #cgo LDFLAGS: -L${SRCDIR}/../pkg/linux_amd64__legacy_os/lib -lvirgil_crypto -lmbedcrypto -lstdc++ -lpythia -lrelic_s
 import "C"

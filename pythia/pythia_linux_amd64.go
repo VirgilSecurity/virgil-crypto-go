@@ -1,4 +1,4 @@
-// +build !gcc48
+// +build !legacy_os
 
 /*
  * BSD 3-Clause License
