@@ -5,6 +5,21 @@ go:
 
 matrix:
   include:
+    ##########################################################################
+    # Clang on OSX
+    # Travis seems to take longer to start OSX instances,
+    # so leave this first for the overall build to be faster
+    ##########################################################################
+
+    # XCode 8.3
+    - os: osx
+      osx_image: xcode8.3
+      env:
+        - CC=clang-3.6
+        - CXX=clang++-3.6
+        - GO_BUILD_PARAM="-tags gcc48"
+      compiler: clang
+
     # ##########################################################################
     # # GCC on Linux
     # ##########################################################################
@@ -85,7 +100,6 @@ matrix:
     #         - g++-9
     #   env:
     #     - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
-
     ##########################################################################
     # Clang on Linux
     ##########################################################################
@@ -141,18 +155,18 @@ matrix:
     #     - CC=clang-6.0
     #     - CXX=clang++-6.0
     #     - GO_BUILD_PARAM="-tags gcc48"
-    - os: linux
-      dist: xenial
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-xenial-7
-          packages:
-            - clang-7
-      env:
-        - CC=clang-7
-        - CXX=clang++-7
+    # - os: linux
+    #   dist: xenial
+    #   addons:
+    #     apt:
+    #       sources:
+    #         - ubuntu-toolchain-r-test
+    #         - llvm-toolchain-xenial-7
+    #       packages:
+    #         - clang-7
+    #   env:
+    #     - CC=clang-7
+    #     - CXX=clang++-7
     # - os: linux
     #   dist: xenial
     #   addons:
