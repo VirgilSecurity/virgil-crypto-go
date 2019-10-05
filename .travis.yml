@@ -142,12 +142,11 @@ matrix:
         - CXX=clang++-6.0
         - GO_BUILD_PARAM="-tags gcc48"
     - os: linux
-      dist: trusty
+      dist: xenial
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-7
           packages:
             - clang-7.0
       env:
@@ -160,11 +159,27 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-xenial-8
+            - sourceline: "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-8 main"
+              key_url: "https://apt.llvm.org/llvm-snapshot.gpg.key"
+            - sourceline: "ppa:ubuntu-toolchain-r/test"
           packages:
             - clang-8.0
       env:
         - CC=clang-8.0
         - CXX=clang++-8.0
+    - os: linux
+      dist: xenial
+      addons:
+        apt:
+          sources:
+            - sourceline: "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-9 main"
+              key_url: "https://apt.llvm.org/llvm-snapshot.gpg.key"
+            - sourceline: "ppa:ubuntu-toolchain-r/test"
+          packages:
+            - clang-9.0
+      env:
+        - CC=clang-9.0
+        - CXX=clang++-9.0
 
 env:
   global:
