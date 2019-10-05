@@ -147,39 +147,40 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
+            - llvm-toolchain-xenial-7
           packages:
             - clang-7
       env:
         - CC=clang-7
         - CXX=clang++-7
-    - os: linux
-      dist: xenial
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-xenial-8
-            - sourceline: "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-8 main"
-              key_url: "https://apt.llvm.org/llvm-snapshot.gpg.key"
-            - sourceline: "ppa:ubuntu-toolchain-r/test"
-          packages:
-            - clang-8
-      env:
-        - CC=clang-8
-        - CXX=clang++-8
-    - os: linux
-      dist: xenial
-      addons:
-        apt:
-          sources:
-            - sourceline: "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-9 main"
-              key_url: "https://apt.llvm.org/llvm-snapshot.gpg.key"
-            - sourceline: "ppa:ubuntu-toolchain-r/test"
-          packages:
-            - clang-9
-      env:
-        - CC=clang-9
-        - CXX=clang++-9
+    # - os: linux
+    #   dist: xenial
+    #   addons:
+    #     apt:
+    #       sources:
+    #         - ubuntu-toolchain-r-test
+    #         - llvm-toolchain-xenial-8
+    #         - sourceline: "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-8 main"
+    #           key_url: "https://apt.llvm.org/llvm-snapshot.gpg.key"
+    #         - sourceline: "ppa:ubuntu-toolchain-r/test"
+    #       packages:
+    #         - clang-8
+    #   env:
+    #     - CC=clang-8
+    #     - CXX=clang++-8
+    # - os: linux
+    #   dist: xenial
+    #   addons:
+    #     apt:
+    #       sources:
+    #         - sourceline: "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-9 main"
+    #           key_url: "https://apt.llvm.org/llvm-snapshot.gpg.key"
+    #         - sourceline: "ppa:ubuntu-toolchain-r/test"
+    #       packages:
+    #         - clang-9
+    #   env:
+    #     - CC=clang-9
+    #     - CXX=clang++-9
 
 env:
   global:
