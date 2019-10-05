@@ -113,6 +113,7 @@ matrix:
       env:
         - CC=clang-4.0
         - CXX=clang++-4.0
+        - GO_BUILD_PARAM="-tags gcc48"
     - os: linux
       dist: trusty
       addons:
@@ -124,6 +125,7 @@ matrix:
       env:
         - CC=clang-5.0
         - CXX=clang++-5.0
+        - GO_BUILD_PARAM="-tags gcc48"
     - os: linux
       dist: trusty
       addons:
@@ -138,6 +140,7 @@ matrix:
       env:
         - CC=clang-6.0
         - CXX=clang++-6.0
+        - GO_BUILD_PARAM="-tags gcc48"
     - os: linux
       dist: trusty
       addons:
