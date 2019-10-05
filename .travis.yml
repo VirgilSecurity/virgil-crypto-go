@@ -161,5 +161,6 @@ before_install:
   - eval "${MATRIX_EVAL}"
 
 script:
+  - go env
   - go mod download
   - go test $GO_BUILD_PARAM -mod=readonly ./...
