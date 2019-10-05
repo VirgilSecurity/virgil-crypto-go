@@ -14,7 +14,7 @@ matrix:
           packages:
             - g++-4.9
       env:
-        - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9"
+        - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9 && GO_BUILD_PARAM='-tags gcc48'"
     - os: linux
       dist: trusty
       addons:
@@ -24,7 +24,7 @@ matrix:
           packages:
             - g++-4.9
       env:
-        - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9"
+        - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9 && GO_BUILD_PARAM='-tags gcc48'"
     - os: linux
       dist: xenial
       addons:
@@ -34,7 +34,7 @@ matrix:
           packages:
             - g++-4.9
       env:
-        - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9"
+        - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9 && GO_BUILD_PARAM='-tags gcc48'"
     - os: linux
       addons:
         apt:
@@ -64,6 +64,24 @@ matrix:
             - g++-7
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-8
+      env:
+        - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-9
+      env:
+        - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
 
 env:
   global:
@@ -74,4 +92,4 @@ before_install:
 
 script:
   - go mod download
-  - go test -mod=readonly ./...
+  - go test $GO_BUILD_PARAM -mod=readonly ./...
