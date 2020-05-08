@@ -1,75 +1,21 @@
-# Virgil Security Go Crypto Library
+# Virgil Crypto Library Go 
 [![GitHub license](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://github.com/VirgilSecurity/virgil/blob/master/LICENSE)
 [![Build Status](https://travis-ci.org/VirgilSecurity/virgil-crypto-go.png?branch=v5)](https://travis-ci.org/VirgilSecurity/virgil-crypto-go)
 
-### [Introduction](#introduction) | [Library purposes](#library-purposes) | [Usage examples](#usage-examples) | [Installation](#installation) | [Docs](#docs) | [License](#license) | [Contacts](#support)
+[Introduction](#introduction) | [Library purposes](#library-purposes) | [Installation](#installation) | [Usage examples](#usage-examples) | [Docs](#docs) | [License](#license) | [Contacts](#support)
 
 ## Introduction
-VirgilCrypto is a stack of security libraries (ECIES with Crypto Agility wrapped in Virgil Cryptogram) and an open-source high-level [cryptographic library](https://github.com/VirgilSecurity/virgil-crypto) that allows you to perform all necessary operations for securely storing and transferring data in your digital solutions. Crypto Library is written in C++ and is suitable for mobile and server platforms.
 
-Virgil Security, Inc., guides software developers into the forthcoming security world in which everything will be encrypted (and passwords will be eliminated). In this world, the days of developers having to raise millions of dollars to build a secure chat, secure email, secure file-sharing, or a secure anything have come to an end. Now developers can instead focus on building features that give them a competitive market advantage while end-users can enjoy the privacy and security they increasingly demand.
+Virgil Crypto Library Go is a stack of security libraries (ECIES with Crypto Agility wrapped in Virgil Cryptogram) and an open-source high-level [cryptographic library](https://github.com/VirgilSecurity/virgil-crypto) that allows you to perform all necessary operations for securely storing and transferring data in your digital solutions. Crypto Library is written in C++ and is suitable for mobile and server platforms.
 
 ## Library purposes
+
 * Asymmetric Key Generation
 * Encryption/Decryption of data and streams
 * Generation/Verification of digital signatures
-* PFS (Perfect Forward Secrecy)
-
-## Usage examples
-
-#### Generate a key pair
-
-Generate a Private Key with the default algorithm (EC_X25519):
-```go
-crypto := virgil_crypto_go.NewVirgilCrypto()
-keypair, err := crypto.GenerateKeypair()
-
-```
-
-#### Generate and verify a signature
-
-Generate signature and sign data with a private key:
-```go
-crypto := virgil_crypto_go.NewVirgilCrypto()
-
-// prepare a message
-dataToSign := []byte("Hello, Bob!")
-
-// generate signature
-signature, err := crypto.Sign(dataToSign, privateKey)
-```
-
-Verify a signature with a public key:
-```go
-crypto := virgil_crypto_go.NewVirgilCrypto()
-
-// verify signature using Alice's Card
-err := crypto.VerifySignature(dataToSign, signature, alicePublicKey)
-
-```
-#### Encrypt and decrypt data
-
-Encrypt Data on a Public Key:
-
-```go
-crypto := virgil_crypto_go.NewVirgilCrypto()
-
-// prepare a message
-message := []byte("Hello, Bob!")
-
-// encrypt the message
-encrypted, err := crypto.Encrypt(message, bobPublicKey)
-
-```
-
-Decrypt the encrypted data with a Private Key:
-
-```go
-crypto := virgil_crypto_go.NewVirgilCrypto()
-
-// decrypt the encrypted data using a private key
-decrypted, err := crypto.Decrypt(encryptedMessage, bobPrivateKey)
-```
+* Double Ratchet algorithm support
+* **Post-quantum algorithms support**: [Round5](https://round5.org/) (encryption) and [Falcon](https://falcon-sign.info/) (signature) 
+* Crypto for using [Virgil Core SDK](https://github.com/VirgilSecurity/virgil-sdk-go)
 
 ## Installation
 
@@ -97,9 +43,121 @@ or
 cryptoimpl.NewVirgilCrypto()
 ```
 
+## Usage examples
+
+### Generate a key pair
+
+Generate a private key using the default algorithm (EC_X25519):
+```go
+crypto := virgil_crypto_go.NewVirgilCrypto()
+keypair, err := crypto.GenerateKeypair()
+
+```
+
+### Generate and verify a signature
+
+Generate signature and sign data with a private key:
+```go
+crypto := virgil_crypto_go.NewVirgilCrypto()
+
+// prepare a message
+dataToSign := []byte("Hello, Bob!")
+
+// generate signature
+signature, err := crypto.Sign(dataToSign, privateKey)
+```
+
+Verify a signature with a public key:
+```go
+crypto := virgil_crypto_go.NewVirgilCrypto()
+
+// verify signature using Alice's Card
+err := crypto.VerifySignature(dataToSign, signature, alicePublicKey)
+
+```
+### Encrypt and decrypt data
+
+Encrypt data with a public key:
+
+```go
+crypto := virgil_crypto_go.NewVirgilCrypto()
+
+// prepare a message
+message := []byte("Hello, Bob!")
+
+// encrypt the message
+encrypted, err := crypto.Encrypt(message, bobPublicKey)
+
+```
+
+Decrypt the encrypted data with a private key:
+
+```go
+crypto := virgil_crypto_go.NewVirgilCrypto()
+
+// decrypt the encrypted data using a private key
+decrypted, err := crypto.Decrypt(encryptedMessage, bobPrivateKey)
+```
+
+### Import and export keys
+
+Export keys:
+
+```
+// generate a new Key
+	keypair, err := crypto.GenerateKeypair()
+	if err != nil {
+		//handle error
+	}
+	// export the private key
+	privateKeyData, err := crypto.ExportPrivateKey(keypair.PrivateKey(), "<YOUR_PASSWORD>")
+	if err != nil {
+		//handle error
+	}
+	//convert to readable format
+	privateKeyStr := base64.StdEncoding.EncodeToString(privateKeyData)
+  
+  // export the public key
+	publicKeyData, err := crypto.ExportPublicKey(keypair.PublicKey())
+	if err != nil {
+		//handle error
+	}
+	//convert to readable format
+	publicKeyStr := base64.StdEncoding.EncodeToString(publicKeyData)
+```
+
+Import keys:
+
+```
+privateKeyStr := "MIGhMF0GCSqGSIb3DQEFDTBQMC8GCSqGSIb3DQEFDDAiBBBtfBoM7VfmWPlvyHuGWvMSAgIZ6zAKBggqhkiG9w0CCjAdBglghkgBZQMEASoEECwaKJKWFNn3OMVoUXEcmqcEQMZ+"
+	privateKeyData, err := base64.StdEncoding.DecodeString(privateKeyStr)
+	if err != nil {
+		//handle error
+	}
+	// import a Private key
+	privateKey, err := crypto.ImportPrivateKey(privateKeyData, "YOUR_PASSWORD")
+	if err != nil {
+		//handle error
+	}
+
+//-----------------------------------------------------
+
+publicKeyStr := "MCowBQYDK2VwAyEA9IVUzsQENtRVzhzraTiEZZy7YLq5LDQOXGQG/q0t0kE="
+	publicKeyData, err := base64.StdEncoding.DecodeString(publicKeyStr)
+	if err != nil {
+		//handle error
+	}
+	// import a Public key
+	publicKey, err := crypto.ImportPublicKey(publicKeyData)
+	if err != nil {
+		//handle error
+	}
+```
+
+
 ## Docs
 - [Crypto Core Library](https://github.com/VirgilSecurity/virgil-crypto)
-- [More usage examples](https://developer.virgilsecurity.com/docs/how-to#cryptography)
+- [Developer Documentation](https://developer.virgilsecurity.com/docs/)
 
 ## License
 
